@@ -40,7 +40,7 @@ jobs:
           docker pull deandoyle/hello-world-go:latest
           docker stop hello-world-go || true
           docker rm hello-world-go || true
-          docker run -d -p 8080:8080 --name hello-world-go deandoyle/hello-world-go:latest
+          docker run -d -p 8080:8080 -e DB_HOST=${{ secrets.DB_HOST }} -e DB_NAME=${{ secrets.DB_NAME }} -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} -e DB_USER=${{ secrets.DB_USER }} --name hello-world-go deandoyle/hello-world-go:latest
           EOF
 
       - name: Clean up SSH Key
