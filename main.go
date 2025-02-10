@@ -1,22 +1,24 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"log"
 
-	"github.com/gorilla/mux"
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/config"
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/handlers"
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/repositories"
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/routes"
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/services"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello, World - CI/CD Testing")
-}
-
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Hello, World")
-	})
+	log.Println("Setting up Database")
+	db := config.InitDB()
 
-	fmt.Println("Server running on port 8080...")
-	http.ListenAndServe(":8080", r)
+	userRepo := repositories.NewUserRepository(db)
+	userService := services.NewUserService(userRepo)
+	userHandler := handlers.NewUserHandler(userService)
+
+	r := routes.SetupRouter(userHandler)
+
+	r.Run(":8080") // Start server on port 8080
 }
