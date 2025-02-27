@@ -18,7 +18,11 @@ func main() {
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 
-	r := routes.SetupRouter(userHandler)
+	gigRepo := repositories.NewGigRepository(db)
+	gigService := services.NewGigService(gigRepo)
+	gigHandler := handlers.NewGigHandler(gigService)
+
+	r := routes.SetupRouter(userHandler, gigHandler)
 
 	r.Run(":8080") // Start server on port 8080
 }
