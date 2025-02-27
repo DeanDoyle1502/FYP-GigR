@@ -47,7 +47,7 @@ func InitDB() *gorm.DB {
 	log.Println("Connected to PostgreSQL successfully")
 
 	// Auto-migrate database tables
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{}, &models.Gig{})
 
 	return db
 }
