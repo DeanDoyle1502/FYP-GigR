@@ -17,7 +17,7 @@ func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHand
 	r.GET("/gigs", gigHandler.GetAllGigs)
 	r.GET("/gigs/:id", gigHandler.GetGig)
 	r.POST("/gigs/:id/apply", gigHandler.ApplyForGig)
-	r.POST("/gigs/:gigID/accept/:musicianID", gigHandler.AcceptMusicianForGig)
+	r.POST("/gigs/:id/accept/:musicianID", gigHandler.AcceptMusicianForGig)
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
