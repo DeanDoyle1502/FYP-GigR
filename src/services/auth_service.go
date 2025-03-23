@@ -5,17 +5,24 @@ import (
 	"fmt"
 
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/config"
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/models"
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/repositories"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
 )
 
 type AuthService struct {
-	Cognito *cognitoidentityprovider.Client
+	Cognito  *cognitoidentityprovider.Client
+	UserRepo *repositories.UserRepository
 }
 
-func NewAuthService(client *cognitoidentityprovider.Client) *AuthService {
-	return &AuthService{Cognito: client}
+func NewAuthService(client *cognitoidentityprovider.Client, userRepo *repositories.UserRepository) *AuthService {
+	return &AuthService{
+		Cognito:  client,
+		UserRepo: userRepo,
+	}
 }
 
 func (s *AuthService) RegisterUser(email, password string) error {
@@ -70,4 +77,8 @@ func (s *AuthService) ConfirmUser(email, code string) error {
 	}
 
 	return nil
+}
+
+func (s *AuthService) GetOrCreateUser(sub, email string) (*models.User, error) {
+	return s.UserRepo.GetOrCreateByCognitoSub(sub, email)
 }

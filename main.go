@@ -33,7 +33,7 @@ func main() {
 	gigHandler := handlers.NewGigHandler(gigService)
 
 	cognitoClient := config.InitCognitoClient()
-	authService := services.NewAuthService(cognitoClient)
+	authService := services.NewAuthService(cognitoClient, userRepo)
 	authHandler := handlers.NewAuthHandler(authService)
 
 	r := routes.SetupRouter(userHandler, gigHandler, authHandler)
