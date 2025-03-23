@@ -1,2 +1,10 @@
 .env
 .postgres
+node_modules/
+build/
+dist/
+
+gigr-frontend/node_modules/
+gigr-frontend/build/
+
+.DS_Store

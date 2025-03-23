@@ -73,3 +73,28 @@ func (h *AuthHandler) ConfirmUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "User confirmed successfully"})
 }
+
+func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
+	claims, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	jwtClaims := claims.(map[string]interface{})
+
+	sub, okSub := jwtClaims["sub"].(string)
+	email, okEmail := jwtClaims["email"].(string)
+	if !okSub || !okEmail {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
+		return
+	}
+
+	user, err := h.Service.GetOrCreateUser(sub, email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not get or create user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
