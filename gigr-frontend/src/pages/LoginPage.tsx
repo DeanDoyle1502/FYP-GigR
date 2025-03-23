@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const RegisterPage: React.FC = () => {
+const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState<string | null>(null);
@@ -15,25 +15,27 @@ const RegisterPage: React.FC = () => {
     setError(null);
 
     try {
-      const res = await axios.post('http://localhost:8080/auth/register', {
+      const res = await axios.post('http://localhost:8080/auth/login', {
         email,
         password,
       });
 
-      setMessage(res.data.message);
-      // Optional: redirect or guide to confirm page
+      // Store the token
+      localStorage.setItem('token', res.data.token);
+      setMessage("Login successful!");
+
       setTimeout(() => {
-        navigate('/confirm', { state: { email } });
-      }, 2000);
+        navigate('/dashboard'); // or wherever you want to send them
+      }, 1000);
     } catch (err: any) {
-      const msg = err.response?.data?.error || 'Something went wrong';
+      const msg = err.response?.data?.error || err.message || 'Something went wrong';
       setError(msg);
     }
   };
 
   return (
     <div style={{ maxWidth: '400px', margin: 'auto', padding: '2rem' }}>
-      <h2>Register</h2>
+      <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="email"
@@ -51,7 +53,7 @@ const RegisterPage: React.FC = () => {
           required
           style={inputStyle}
         />
-        <button type="submit" style={buttonStyle}>Register</button>
+        <button type="submit" style={buttonStyle}>Login</button>
       </form>
 
       {message && <p style={{ color: 'green', marginTop: '1rem' }}>{message}</p>}
@@ -60,7 +62,6 @@ const RegisterPage: React.FC = () => {
   );
 };
 
-// Basic styles
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '0.5rem',
@@ -79,4 +80,4 @@ const buttonStyle: React.CSSProperties = {
   cursor: 'pointer',
 };
 
-export default RegisterPage;
+export default LoginPage;

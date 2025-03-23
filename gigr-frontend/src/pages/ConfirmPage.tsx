@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const RegisterPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+
+
+const ConfirmPage: React.FC = () => {
+    const location = useLocation();
+    const passedEmail = (location.state as { email?: string })?.email || '';
+  
+    const [email] = useState(passedEmail); 
+    const [code, setCode] = useState('');
+    const [message, setMessage] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,43 +22,44 @@ const RegisterPage: React.FC = () => {
     setError(null);
 
     try {
-      const res = await axios.post('http://localhost:8080/auth/register', {
+      const res = await axios.post('http://localhost:8080/auth/confirm', {
         email,
-        password,
+        code,
       });
 
       setMessage(res.data.message);
-      // Optional: redirect or guide to confirm page
+
+      // Redirect to login after short delay
       setTimeout(() => {
-        navigate('/confirm', { state: { email } });
+        navigate('/login');
       }, 2000);
     } catch (err: any) {
-      const msg = err.response?.data?.error || 'Something went wrong';
+      const msg = err.response?.data?.error || err.message || 'Something went wrong';
       setError(msg);
     }
   };
 
   return (
     <div style={{ maxWidth: '400px', margin: 'auto', padding: '2rem' }}>
-      <h2>Register</h2>
+      <h2>Confirm Your Account</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          readOnly
           style={inputStyle}
         />
+
         <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          type="text"
+          placeholder="6-digit code"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
           required
           style={inputStyle}
         />
-        <button type="submit" style={buttonStyle}>Register</button>
+        <button type="submit" style={buttonStyle}>Confirm</button>
       </form>
 
       {message && <p style={{ color: 'green', marginTop: '1rem' }}>{message}</p>}
@@ -60,7 +68,6 @@ const RegisterPage: React.FC = () => {
   );
 };
 
-// Basic styles
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '0.5rem',
@@ -72,11 +79,11 @@ const inputStyle: React.CSSProperties = {
 const buttonStyle: React.CSSProperties = {
   width: '100%',
   padding: '0.6rem',
-  backgroundColor: '#007bff',
+  backgroundColor: '#28a745',
   color: 'white',
   border: 'none',
   borderRadius: '4px',
   cursor: 'pointer',
 };
 
-export default RegisterPage;
+export default ConfirmPage;
