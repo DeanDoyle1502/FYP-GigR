@@ -37,3 +37,22 @@ func (s *AuthService) RegisterUser(email, password string) error {
 	}
 	return nil
 }
+
+func (s *AuthService) LoginUser(email, password string) (string, error) {
+	input := &cognitoidentityprovider.InitiateAuthInput{
+		AuthFlow: types.AuthFlowTypeUserPasswordAuth,
+		ClientId: aws.String(config.GetClientID()),
+		AuthParameters: map[string]string{
+			"USERNAME": email,
+			"PASSWORD": password,
+		},
+	}
+
+	result, err := s.Cognito.InitiateAuth(context.TODO(), input)
+	if err != nil {
+		return "", fmt.Errorf("login failed: %w", err)
+	}
+
+	// Return the JWT ID token
+	return *result.AuthenticationResult.IdToken, nil
+}
