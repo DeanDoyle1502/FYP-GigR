@@ -28,6 +28,7 @@ func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHand
 	// Authorisation
 	r.POST("/auth/register", authHandler.RegisterUser)
 	r.POST("/auth/login", authHandler.LoginUser)
+	r.POST("/auth/confirm", authHandler.ConfirmUser)
 
 	return r
 }

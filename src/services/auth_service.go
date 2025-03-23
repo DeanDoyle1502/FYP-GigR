@@ -56,3 +56,18 @@ func (s *AuthService) LoginUser(email, password string) (string, error) {
 	// Return the JWT ID token
 	return *result.AuthenticationResult.IdToken, nil
 }
+
+func (s *AuthService) ConfirmUser(email, code string) error {
+	input := &cognitoidentityprovider.ConfirmSignUpInput{
+		ClientId:         aws.String(config.GetClientID()),
+		Username:         aws.String(email),
+		ConfirmationCode: aws.String(code),
+	}
+
+	_, err := s.Cognito.ConfirmSignUp(context.TODO(), input)
+	if err != nil {
+		return fmt.Errorf("confirmation failed: %w", err)
+	}
+
+	return nil
+}
