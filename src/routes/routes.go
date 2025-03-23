@@ -23,11 +23,15 @@ func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHand
 	r.POST("/users", userHandler.CreateUser)
 
 	// Define gig routes
-	r.POST("/gigs", gigHandler.CreateGig)
-	r.GET("/gigs", gigHandler.GetAllGigs)
-	r.GET("/gigs/:id", gigHandler.GetGig)
-	r.POST("/gigs/:id/apply", gigHandler.ApplyForGig)
-	r.POST("/gigs/:id/accept/:musicianID", gigHandler.AcceptMusicianForGig)
+	gigs := r.Group("/gigs")
+	gigs.Use(middleware.AuthMiddleware())
+	{
+		gigs.POST("/", gigHandler.CreateGig)
+		gigs.GET("/", gigHandler.GetAllGigs)
+		gigs.GET("/:id", gigHandler.GetGig)
+		gigs.POST("/:id/apply", gigHandler.ApplyForGig)
+		gigs.POST("/:id/accept/:musicianID", gigHandler.AcceptMusicianForGig)
+	}
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

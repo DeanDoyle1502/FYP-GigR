@@ -28,13 +28,13 @@ func main() {
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 
-	gigRepo := repositories.NewGigRepository(db)
-	gigService := services.NewGigService(gigRepo)
-	gigHandler := handlers.NewGigHandler(gigService)
-
 	cognitoClient := config.InitCognitoClient()
 	authService := services.NewAuthService(cognitoClient, userRepo)
 	authHandler := handlers.NewAuthHandler(authService)
+
+	gigRepo := repositories.NewGigRepository(db)
+	gigService := services.NewGigService(gigRepo, authService)
+	gigHandler := handlers.NewGigHandler(gigService)
 
 	r := routes.SetupRouter(userHandler, gigHandler, authHandler)
 

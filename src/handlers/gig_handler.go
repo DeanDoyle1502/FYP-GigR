@@ -7,6 +7,7 @@ import (
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/models"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/services"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type GigHandler struct {
@@ -18,20 +19,47 @@ func NewGigHandler(service *services.GigService) *GigHandler {
 	return &GigHandler{Service: service}
 }
 
-// Create Gig
 func (h *GigHandler) CreateGig(c *gin.Context) {
-	var gig models.Gig
-	if err := c.ShouldBindJSON(&gig); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	// Extract JWT claims from context (set by AuthMiddleware)
+	claims, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
+	jwtClaims := claims.(jwt.MapClaims)
+
+	sub, ok := jwtClaims["sub"].(string)
+	email, okEmail := jwtClaims["email"].(string)
+	if !ok || !okEmail {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		return
+	}
+
+	// Get the authenticated DB user
+	user, err := h.Service.AuthService.GetOrCreateUser(sub, email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not load user"})
+		return
+	}
+
+	// Parse incoming JSON
+	var gig models.Gig
+	if err := c.ShouldBindJSON(&gig); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid gig data"})
+		return
+	}
+
+	// Attach the user ID
+	gig.UserID = user.ID
+
+	// Save the gig
 	if err := h.Service.CreateGig(&gig); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create gig"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gig)
+	c.JSON(http.StatusCreated, gin.H{"message": "Gig created successfully", "gig": gig})
 }
 
 // Get All Gigs

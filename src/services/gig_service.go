@@ -6,12 +6,15 @@ import (
 )
 
 type GigService struct {
-	Repo *repositories.GigRepository
+	Repo        *repositories.GigRepository
+	AuthService *AuthService
 }
 
-// Constructor function
-func NewGigService(repo *repositories.GigRepository) *GigService {
-	return &GigService{Repo: repo}
+func NewGigService(repo *repositories.GigRepository, authService *AuthService) *GigService {
+	return &GigService{
+		Repo:        repo,
+		AuthService: authService,
+	}
 }
 
 // Create a gig
