@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/config"
@@ -22,7 +23,13 @@ func main() {
 	gigService := services.NewGigService(gigRepo)
 	gigHandler := handlers.NewGigHandler(gigService)
 
-	r := routes.SetupRouter(userHandler, gigHandler)
+	cognitoClient := config.InitCognitoClient()
+	authService := services.NewAuthService(cognitoClient)
+	authHandler := handlers.NewAuthHandler(authService)
+
+	r := routes.SetupRouter(userHandler, gigHandler, authHandler)
+
+	fmt.Println("🚀 Server started with auth routes")
 
 	r.Run("0.0.0.0:8080") // Start server on port 8080
 }
