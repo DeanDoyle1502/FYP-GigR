@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/handlers"
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,6 +30,15 @@ func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHand
 	r.POST("/auth/register", authHandler.RegisterUser)
 	r.POST("/auth/login", authHandler.LoginUser)
 	r.POST("/auth/confirm", authHandler.ConfirmUser)
+
+	auth := r.Group("/auth")
+	auth.Use(middleware.AuthMiddleware())
+	{
+		auth.GET("/me", func(c *gin.Context) {
+			claims, _ := c.Get("user")
+			c.JSON(200, gin.H{"user": claims})
+		})
+	}
 
 	return r
 }

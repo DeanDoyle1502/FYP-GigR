@@ -4,14 +4,23 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/joho/godotenv"
+
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/config"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/handlers"
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/middleware"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/repositories"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/routes"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/services"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	middleware.SetupJWKs()
+
 	log.Println("Setting up Database")
 	db := config.InitDB()
 
