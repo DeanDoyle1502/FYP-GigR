@@ -50,3 +50,26 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, user)
 }
+
+// Get the currently logged-in user (via Cognito sub)
+func (h *UserHandler) GetCurrentUser(c *gin.Context) {
+	subValue, exists := c.Get("sub")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: missing Cognito sub"})
+		return
+	}
+
+	sub, ok := subValue.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid Cognito sub"})
+		return
+	}
+
+	user, err := h.Service.GetUserByCognitoSub(sub)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}

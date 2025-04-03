@@ -32,7 +32,7 @@ func SetupJWKs() {
 	}
 }
 
-// Middleware to verify JWT and attach user info to context
+// Middleware to verify JWT and attach Cognito sub to context
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -64,8 +64,14 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Attach claims to context for later use
-		c.Set("user", claims)
+		sub, ok := claims["sub"].(string)
+		if !ok || sub == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token missing user ID (sub)"})
+			c.Abort()
+			return
+		}
+
+		c.Set("sub", sub)
 		c.Next()
 	}
 }

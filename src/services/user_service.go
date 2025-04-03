@@ -23,3 +23,7 @@ func (s *UserService) GetUser(id uint) (*models.User, error) {
 func (s *UserService) RegisterUser(user *models.User) error {
 	return s.Repo.CreateUser(user)
 }
+
+func (s *UserService) GetUserByCognitoSub(sub string) (*models.User, error) {
+	return s.Repo.GetUserByCognitoSub(sub)
+}
