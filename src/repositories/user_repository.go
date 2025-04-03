@@ -71,3 +71,8 @@ func (repo *UserRepository) GetUserByCognitoSub(sub string) (*models.User, error
 	}
 	return &user, nil
 }
+
+// Delete user by ID
+func (repo *UserRepository) DeleteUserByID(id uint) error {
+	return repo.DB.Delete(&models.User{}, id).Error
+}
