@@ -1,6 +1,8 @@
 package services
 
 import (
+	"errors"
+
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/models"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/repositories"
 )
@@ -40,4 +42,33 @@ func (s *GigService) ApplyForGig(application *models.GigApplication) error {
 // Accept a musician for a gig
 func (s *GigService) AcceptMusicianForGig(gigID uint, musicianID uint) error {
 	return s.Repo.AcceptMusicianForGig(gigID, musicianID)
+}
+
+// Get gigs by user ID
+func (s *GigService) GetGigsByUser(userID uint) ([]models.Gig, error) {
+	return s.Repo.GetGigsByUserID(userID)
+}
+
+func (s *GigService) UpdateGig(gigID uint, userID uint, updated *models.Gig) (*models.Gig, error) {
+	// Only update if gig belongs to user
+	gig, err := s.Repo.GetGigByID(gigID)
+	if err != nil {
+		return nil, err
+	}
+	if gig.UserID != userID {
+		return nil, errors.New("not allowed to update this gig")
+	}
+
+	return s.Repo.UpdateGig(gig, updated)
+}
+
+func (s *GigService) DeleteGig(gigID uint, userID uint) error {
+	gig, err := s.Repo.GetGigByID(gigID)
+	if err != nil {
+		return err
+	}
+	if gig.UserID != userID {
+		return errors.New("not allowed to delete this gig")
+	}
+	return s.Repo.DeleteGig(gigID)
 }

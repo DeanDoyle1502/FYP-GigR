@@ -29,8 +29,12 @@ func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHand
 		gigs.POST("/", gigHandler.CreateGig)
 		gigs.GET("/", gigHandler.GetAllGigs)
 		gigs.GET("/:id", gigHandler.GetGig)
+		gigs.GET("/mine", gigHandler.GetMyGigs)
 		gigs.POST("/:id/apply", gigHandler.ApplyForGig)
 		gigs.POST("/:id/accept/:musicianID", gigHandler.AcceptMusicianForGig)
+		gigs.PUT("/:id", gigHandler.UpdateGig)
+		gigs.DELETE("/:id", gigHandler.DeleteGig)
+
 	}
 
 	r.GET("/ping", func(c *gin.Context) {
