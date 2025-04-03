@@ -5,7 +5,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  cognitoSub: string;
+  
 }
 
 const Dashboard: React.FC = () => {
@@ -34,7 +34,7 @@ const Dashboard: React.FC = () => {
           id: raw.ID,
           name: raw.Name,
           email: raw.Email,
-          cognitoSub: raw.CognitoSub,
+          
         };
 
         setUser(transformedUser);
@@ -52,7 +52,7 @@ const Dashboard: React.FC = () => {
     <div style={{ maxWidth: "600px", margin: "2rem auto", textAlign: "center" }}>
       <h1>Welcome back, {user.name || user.email}!</h1>
       <p>Your user ID: {user.id}</p>
-      <p>Cognito Sub: {user.cognitoSub}</p>
+      
     </div>
   );
 };
