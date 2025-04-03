@@ -61,3 +61,14 @@ func (s *GigService) UpdateGig(gigID uint, userID uint, updated *models.Gig) (*m
 
 	return s.Repo.UpdateGig(gig, updated)
 }
+
+func (s *GigService) DeleteGig(gigID uint, userID uint) error {
+	gig, err := s.Repo.GetGigByID(gigID)
+	if err != nil {
+		return err
+	}
+	if gig.UserID != userID {
+		return errors.New("not allowed to delete this gig")
+	}
+	return s.Repo.DeleteGig(gigID)
+}

@@ -63,3 +63,7 @@ func (repo *GigRepository) UpdateGig(existing *models.Gig, updated *models.Gig) 
 	err := repo.DB.Save(existing).Error
 	return existing, err
 }
+
+func (repo *GigRepository) DeleteGig(id uint) error {
+	return repo.DB.Delete(&models.Gig{}, id).Error
+}

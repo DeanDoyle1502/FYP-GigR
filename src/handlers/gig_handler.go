@@ -188,3 +188,36 @@ func (h *GigHandler) UpdateGig(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Gig updated", "gig": updatedGig})
 }
+
+func (h *GigHandler) DeleteGig(c *gin.Context) {
+	claims, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	jwtClaims := claims.(jwt.MapClaims)
+	sub := jwtClaims["sub"].(string)
+	email := jwtClaims["email"].(string)
+
+	user, err := h.Service.AuthService.GetOrCreateUser(sub, email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not load user"})
+		return
+	}
+
+	// Get gig ID
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid gig ID"})
+		return
+	}
+
+	err = h.Service.DeleteGig(uint(id), user.ID)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Gig deleted successfully"})
+}

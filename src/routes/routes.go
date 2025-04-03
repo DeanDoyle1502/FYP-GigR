@@ -33,6 +33,7 @@ func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHand
 		gigs.POST("/:id/apply", gigHandler.ApplyForGig)
 		gigs.POST("/:id/accept/:musicianID", gigHandler.AcceptMusicianForGig)
 		gigs.PUT("/:id", gigHandler.UpdateGig)
+		gigs.DELETE("/:id", gigHandler.DeleteGig)
 
 	}
 
