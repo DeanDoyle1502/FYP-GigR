@@ -25,7 +25,7 @@ func NewAuthService(client *cognitoidentityprovider.Client, userRepo *repositori
 	}
 }
 
-func (s *AuthService) RegisterUser(email, password string) error {
+func (s *AuthService) RegisterUser(email, password, name, instrument, location, bio string) error {
 	input := &cognitoidentityprovider.SignUpInput{
 		ClientId: aws.String(config.GetClientID()),
 		Username: aws.String(email),
@@ -43,7 +43,7 @@ func (s *AuthService) RegisterUser(email, password string) error {
 		return fmt.Errorf("failed to register user in Cognito: %w", err)
 	}
 
-	// ✅ Use AdminGetUser to fetch Cognito sub
+	// ✅ Retrieve Cognito sub
 	adminInput := &cognitoidentityprovider.AdminGetUserInput{
 		UserPoolId: aws.String(config.GetUserPoolID()),
 		Username:   aws.String(email),
@@ -65,11 +65,16 @@ func (s *AuthService) RegisterUser(email, password string) error {
 		return fmt.Errorf("could not find Cognito sub after signup")
 	}
 
-	// ✅ Save user in DB
+	// ✅ Store full user info
 	user := &models.User{
 		Email:      email,
 		CognitoSub: cognitoSub,
+		Name:       name,
+		Instrument: instrument,
+		Location:   location,
+		Bio:        bio,
 	}
+
 	if err := s.UserRepo.CreateUser(user); err != nil {
 		return fmt.Errorf("user added to Cognito, but failed to save in DB: %w", err)
 	}

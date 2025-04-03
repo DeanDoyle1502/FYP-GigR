@@ -5,6 +5,10 @@ import { useNavigate } from 'react-router-dom';
 const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [instrument, setInstrument] = useState('');
+  const [location, setLocation] = useState('');
+  const [bio, setBio] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -18,10 +22,13 @@ const RegisterPage: React.FC = () => {
       const res = await axios.post('http://localhost:8080/auth/register', {
         email,
         password,
+        name,
+        instrument,
+        location,
+        bio,
       });
 
       setMessage(res.data.message);
-      // Optional: redirect or guide to confirm page
       setTimeout(() => {
         navigate('/confirm', { state: { email } });
       }, 2000);
@@ -32,25 +39,16 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: 'auto', padding: '2rem' }}>
+    <div style={{ maxWidth: '500px', margin: 'auto', padding: '2rem' }}>
       <h2>Register</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={inputStyle}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={inputStyle}
-        />
+        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={inputStyle} />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={inputStyle} />
+        <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} required style={inputStyle} />
+        <input type="text" placeholder="Instrument" value={instrument} onChange={(e) => setInstrument(e.target.value)} required style={inputStyle} />
+        <input type="text" placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} required style={inputStyle} />
+        <textarea placeholder="Bio" value={bio} onChange={(e) => setBio(e.target.value)} required style={{ ...inputStyle, height: '80px' }} />
+
         <button type="submit" style={buttonStyle}>Register</button>
       </form>
 
@@ -60,7 +58,6 @@ const RegisterPage: React.FC = () => {
   );
 };
 
-// Basic styles
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '0.5rem',
