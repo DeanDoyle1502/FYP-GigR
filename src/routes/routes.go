@@ -48,13 +48,11 @@ func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHand
 	r.POST("/auth/login", authHandler.LoginUser)
 	r.POST("/auth/confirm", authHandler.ConfirmUser)
 
+	// Protected /auth routes (require valid JWT)
 	auth := r.Group("/auth")
 	auth.Use(middleware.AuthMiddleware())
 	{
-		auth.GET("/me", func(c *gin.Context) {
-			claims, _ := c.Get("user")
-			c.JSON(200, gin.H{"user": claims})
-		})
+		auth.GET("/me", userHandler.GetCurrentUser)
 	}
 
 	return r

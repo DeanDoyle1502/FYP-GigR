@@ -55,9 +55,19 @@ func (repo *UserRepository) GetOrCreateByCognitoSub(sub, email string) (*models.
 	newUser := models.User{
 		Email:      email,
 		CognitoSub: sub,
+		Name:       email,
 	}
 	if err := repo.DB.Create(&newUser).Error; err != nil {
 		return nil, err
 	}
 	return &newUser, nil
+}
+
+// Get user by Cognito Sub
+func (repo *UserRepository) GetUserByCognitoSub(sub string) (*models.User, error) {
+	var user models.User
+	if err := repo.DB.Where("cognito_sub = ?", sub).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

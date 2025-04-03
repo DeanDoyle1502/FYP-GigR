@@ -15,6 +15,7 @@ func NewAuthHandler(service *services.AuthService) *AuthHandler {
 	return &AuthHandler{Service: service}
 }
 
+// POST /auth/register
 func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	var req struct {
 		Email    string `json:"email"`
@@ -35,6 +36,7 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 }
 
+// POST /auth/login
 func (h *AuthHandler) LoginUser(c *gin.Context) {
 	var req struct {
 		Email    string `json:"email"`
@@ -55,6 +57,7 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
+// POST /auth/confirm
 func (h *AuthHandler) ConfirmUser(c *gin.Context) {
 	var req struct {
 		Email string `json:"email"`
@@ -74,6 +77,7 @@ func (h *AuthHandler) ConfirmUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User confirmed successfully"})
 }
 
+// GET /auth/me
 func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 	claims, exists := c.Get("user")
 	if !exists {
@@ -92,7 +96,7 @@ func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 
 	user, err := h.Service.GetOrCreateUser(sub, email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not get or create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user"})
 		return
 	}
 
