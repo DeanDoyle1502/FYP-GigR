@@ -40,8 +40,40 @@ func (s *AuthService) RegisterUser(email, password string) error {
 
 	_, err := s.Cognito.SignUp(context.TODO(), input)
 	if err != nil {
-		return fmt.Errorf("failed to register user: %w", err)
+		return fmt.Errorf("failed to register user in Cognito: %w", err)
 	}
+
+	// ✅ Use AdminGetUser to fetch Cognito sub
+	adminInput := &cognitoidentityprovider.AdminGetUserInput{
+		UserPoolId: aws.String(config.GetUserPoolID()),
+		Username:   aws.String(email),
+	}
+
+	userOutput, err := s.Cognito.AdminGetUser(context.TODO(), adminInput)
+	if err != nil {
+		return fmt.Errorf("user created in Cognito but failed to retrieve details: %w", err)
+	}
+
+	var cognitoSub string
+	for _, attr := range userOutput.UserAttributes {
+		if *attr.Name == "sub" {
+			cognitoSub = *attr.Value
+			break
+		}
+	}
+	if cognitoSub == "" {
+		return fmt.Errorf("could not find Cognito sub after signup")
+	}
+
+	// ✅ Save user in DB
+	user := &models.User{
+		Email:      email,
+		CognitoSub: cognitoSub,
+	}
+	if err := s.UserRepo.CreateUser(user); err != nil {
+		return fmt.Errorf("user added to Cognito, but failed to save in DB: %w", err)
+	}
+
 	return nil
 }
 
