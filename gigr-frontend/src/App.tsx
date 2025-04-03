@@ -4,12 +4,13 @@ import RegisterPage from './pages/RegisterPage';
 import ConfirmPage from './pages/ConfirmPage';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
+import HomePage from './pages/HomePage';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<h1>Home Page</h1>} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/confirm" element={<ConfirmPage/>}/>
         <Route path="/login" element={<LoginPage />} />

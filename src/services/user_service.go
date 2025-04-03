@@ -27,3 +27,7 @@ func (s *UserService) RegisterUser(user *models.User) error {
 func (s *UserService) GetUserByCognitoSub(sub string) (*models.User, error) {
 	return s.Repo.GetUserByCognitoSub(sub)
 }
+
+func (s *UserService) DeleteUser(id uint) error {
+	return s.Repo.DeleteUserByID(id)
+}

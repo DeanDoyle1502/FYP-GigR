@@ -5,7 +5,9 @@ interface User {
   id: number;
   name: string;
   email: string;
-  
+  instrument: string;
+  location: string;
+  bio: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -29,15 +31,17 @@ const Dashboard: React.FC = () => {
       .then((res) => {
         const raw = res.data;
 
-        // Transform Go response to match our TypeScript interface
-        const transformedUser: User = {
+        
+        const normalizedUser = {
           id: raw.ID,
           name: raw.Name,
           email: raw.Email,
-          
+          instrument: raw.Instrument,
+          location: raw.Location,
+          bio: raw.Bio,
         };
-
-        setUser(transformedUser);
+    
+        setUser(normalizedUser);
       })
       .catch((err) => {
         console.error("Failed to fetch user info:", err);
@@ -51,8 +55,10 @@ const Dashboard: React.FC = () => {
   return (
     <div style={{ maxWidth: "600px", margin: "2rem auto", textAlign: "center" }}>
       <h1>Welcome back, {user.name || user.email}!</h1>
-      <p>Your user ID: {user.id}</p>
-      
+      <p>Email: {user.email}</p>
+      <p>Instrument: {user.instrument}</p>
+      <p>Location: {user.location}</p>
+      <p>Bio: {user.bio}</p>
     </div>
   );
 };

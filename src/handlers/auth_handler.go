@@ -18,8 +18,12 @@ func NewAuthHandler(service *services.AuthService) *AuthHandler {
 // POST /auth/register
 func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	var req struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Email      string `json:"email"`
+		Password   string `json:"password"`
+		Name       string `json:"name"`
+		Instrument string `json:"instrument"`
+		Location   string `json:"location"`
+		Bio        string `json:"bio"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -27,7 +31,7 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 		return
 	}
 
-	err := h.Service.RegisterUser(req.Email, req.Password)
+	err := h.Service.RegisterUser(req.Email, req.Password, req.Name, req.Instrument, req.Location, req.Bio)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
