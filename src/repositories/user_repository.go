@@ -28,24 +28,36 @@ func (repo *UserRepository) CreateUser(user *models.User) error {
 	return repo.DB.Create(user).Error
 }
 
+// Safe Get or Create by Cognito Sub, falling back to email
 func (repo *UserRepository) GetOrCreateByCognitoSub(sub, email string) (*models.User, error) {
 	var user models.User
 
+	// Step 1: Try to find by Cognito Sub
 	err := repo.DB.Where("cognito_sub = ?", sub).First(&user).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// Create a new user
-			user = models.User{
-				CognitoSub: sub,
-				Email:      email,
-			}
-			if err := repo.DB.Create(&user).Error; err != nil {
+	if err == nil {
+		return &user, nil
+	}
+
+	// Step 2: If not found by sub, try email
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		err = repo.DB.Where("email = ?", email).First(&user).Error
+		if err == nil {
+			// Update existing user with new cognito_sub
+			user.CognitoSub = sub
+			if err := repo.DB.Save(&user).Error; err != nil {
 				return nil, err
 			}
 			return &user, nil
 		}
-		return nil, err
 	}
 
-	return &user, nil
+	// Step 3: If still not found, create new user
+	newUser := models.User{
+		Email:      email,
+		CognitoSub: sub,
+	}
+	if err := repo.DB.Create(&newUser).Error; err != nil {
+		return nil, err
+	}
+	return &newUser, nil
 }

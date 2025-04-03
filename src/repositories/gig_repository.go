@@ -44,3 +44,22 @@ func (repo *GigRepository) AcceptMusicianForGig(gigID uint, musicianID uint) err
 		Where("gig_id = ? AND musician_id = ?", gigID, musicianID).
 		Update("status", "accepted").Error
 }
+
+// Get Gigs by User ID
+func (repo *GigRepository) GetGigsByUserID(userID uint) ([]models.Gig, error) {
+	var gigs []models.Gig
+	err := repo.DB.Where("user_id = ?", userID).Find(&gigs).Error
+	return gigs, err
+}
+
+func (repo *GigRepository) UpdateGig(existing *models.Gig, updated *models.Gig) (*models.Gig, error) {
+	existing.Title = updated.Title
+	existing.Description = updated.Description
+	existing.Location = updated.Location
+	existing.Date = updated.Date
+	existing.Instrument = updated.Instrument
+	existing.Status = updated.Status
+
+	err := repo.DB.Save(existing).Error
+	return existing, err
+}
