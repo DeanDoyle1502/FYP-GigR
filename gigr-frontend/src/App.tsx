@@ -5,6 +5,7 @@ import ConfirmPage from './pages/ConfirmPage';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
 import HomePage from './pages/HomePage';
+import CreateGigPage from './pages/CreateGigPage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/confirm" element={<ConfirmPage/>}/>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/gigs/create" element={<CreateGigPage />} />
       </Routes>
     </Router>
   );

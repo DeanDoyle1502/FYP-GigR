@@ -35,8 +35,13 @@ func SetupJWKs() {
 // Middleware to verify JWT and attach Cognito sub to context
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		fmt.Println("🔐 AuthMiddleware triggered")
+
 		authHeader := c.GetHeader("Authorization")
+		fmt.Println("📦 Authorization header received:", authHeader)
+
 		if authHeader == "" {
+			fmt.Println("❌ No Authorization header found")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing Authorization header"})
 			c.Abort()
 			return
@@ -44,14 +49,18 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+			fmt.Println("❌ Invalid Authorization header format:", parts)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header format"})
 			c.Abort()
 			return
 		}
 
 		tokenString := parts[1]
+		fmt.Println("🔑 Token string to parse:", tokenString)
+
 		token, err := jwt.Parse(tokenString, jwks.Keyfunc)
 		if err != nil || !token.Valid {
+			fmt.Println("❌ Error parsing token:", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
@@ -59,19 +68,25 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
+			fmt.Println("❌ Error parsing claims from token")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			c.Abort()
 			return
 		}
 
+		fmt.Println("✅ Token claims:", claims)
+
 		sub, ok := claims["sub"].(string)
 		if !ok || sub == "" {
+			fmt.Println("❌ Token is missing 'sub' field")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token missing user ID (sub)"})
 			c.Abort()
 			return
 		}
 
+		c.Set("user", claims)
 		c.Set("sub", sub)
+
 		c.Next()
 	}
 }
