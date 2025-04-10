@@ -16,24 +16,37 @@ const CreateGigPage: React.FC = () => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-
+  
     const token = localStorage.getItem("token");
     const formattedDate = new Date(date).toISOString();
-
+  
     try {
-      await axios.post(
+      const res = await axios.post(
         "http://localhost:8080/gigs/",
-        { title, description, location, formattedDate, instrument },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          title,
+          description,
+          location,
+          date: formattedDate, // fix: rename to "date"
+          instrument,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-
+  
+      const createdGigId = res.data.gig.id;
+  
       setSuccess("Gig created successfully!");
-      setTimeout(() => navigate("/dashboard"), 1500);
+      setTimeout(() => navigate(`/gigs/${createdGigId}`), 1500);
     } catch (err: any) {
       console.error("Gig creation failed:", err);
       setError(err.response?.data?.error || "Something went wrong.");
     }
   };
+  
 
   return (
     <div style={{ maxWidth: "600px", margin: "2rem auto" }}>

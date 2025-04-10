@@ -62,22 +62,31 @@ const Dashboard: React.FC = () => {
       <p>Bio: {user.bio}</p>
 
       <button
-        style={{
-          marginTop: "2rem",
-          padding: "0.6rem 1.2rem",
-          fontSize: "1rem",
-          cursor: "pointer",
-          borderRadius: "4px",
-          border: "none",
-          backgroundColor: "#28a745",
-          color: "white",
-        }}
+        style={buttonStyle}
         onClick={() => navigate("/gigs/create")}
       >
         Create a New Gig
       </button>
+
+      <button
+        style={{ ...buttonStyle, backgroundColor: "#007bff", marginTop: "1rem" }}
+        onClick={() => navigate("/gigs/mine")}
+      >
+        View My Gigs
+      </button>
     </div>
   );
+};
+
+const buttonStyle: React.CSSProperties = {
+  marginTop: "2rem",
+  padding: "0.6rem 1.2rem",
+  fontSize: "1rem",
+  cursor: "pointer",
+  borderRadius: "4px",
+  border: "none",
+  backgroundColor: "#28a745",
+  color: "white",
 };
 
 export default Dashboard;
