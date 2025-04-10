@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage';
 import CreateGigPage from './pages/CreateGigPage';
 import MyGigsPage from './pages/MyGigsPage';
 import GigDetailPage from './pages/GigDetailsPage';
+import EditGigPage from './pages/EditGigPage';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/gigs/create" element={<CreateGigPage />} />
         <Route path="/gigs/mine" element={<MyGigsPage />} />
         <Route path="/gigs/:id" element={<GigDetailPage />} />
+        <Route path="/gigs/:id/edit" element={<EditGigPage />} />
       </Routes>
     </Router>
   );

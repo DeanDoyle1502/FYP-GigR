@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -179,9 +180,22 @@ func (h *GigHandler) UpdateGig(c *gin.Context) {
 		return
 	}
 
+	// Log the incoming gig data for debugging
+	fmt.Println("Received data for updating gig:", updatedData)
+
+	// Ensure all fields are present
+	if updatedData.Title == "" || updatedData.Description == "" || updatedData.Location == "" || updatedData.Instrument == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
+		return
+	}
+
+	// No need to manually parse date; just use it as it is
+	// updatedData.Date is already of type time.Time, so it's ready to be saved as is
+
 	// Call service to handle the update
 	updatedGig, err := h.Service.UpdateGig(uint(id), user.ID, &updatedData)
 	if err != nil {
+		fmt.Println("Received error:", err) // Debug log for error
 		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		return
 	}
