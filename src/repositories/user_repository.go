@@ -16,6 +16,12 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{DB: db}
 }
 
+func (r *UserRepository) GetAll() ([]models.User, error) {
+	var users []models.User
+	result := r.DB.Find(&users)
+	return users, result.Error
+}
+
 // Find user by ID
 func (repo *UserRepository) GetUserByID(id uint) (*models.User, error) {
 	var user models.User

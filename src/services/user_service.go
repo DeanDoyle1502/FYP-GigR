@@ -14,6 +14,11 @@ func NewUserService(repo *repositories.UserRepository) *UserService {
 	return &UserService{Repo: repo}
 }
 
+// Fetch all users
+func (s *UserService) GetAllUsers() ([]models.User, error) {
+	return s.Repo.GetAll()
+}
+
 // Fetch user by ID
 func (s *UserService) GetUser(id uint) (*models.User, error) {
 	return s.Repo.GetUserByID(id)

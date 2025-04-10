@@ -19,6 +19,7 @@ func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHand
 	}))
 
 	// Define user routes
+	r.GET("/users", userHandler.GetAllUsers)
 	r.GET("/users/:id", userHandler.GetUser)
 	r.POST("/users", userHandler.CreateUser)
 	r.DELETE("/users/:id", userHandler.DeleteUser)
