@@ -74,6 +74,12 @@ const Dashboard: React.FC = () => {
       >
         View My Gigs
       </button>
+      <button
+        onClick={() => navigate("/gigs/public")}
+        style={{ ...buttonStyle, backgroundColor: "#6f42c1", marginLeft: "1rem" }}
+      >
+        Browse Available Gigs
+</button>
     </div>
   );
 };

@@ -1,46 +1,45 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div style={styles.container}>
+    <div style={{ textAlign: "center", marginTop: "3rem" }}>
       <h1>Welcome to GigR 🎸</h1>
-      <p>Find and create music gigs with ease.</p>
+      <p>Connect musicians with acts & bands near you.</p>
 
-      <div style={styles.buttonContainer}>
-        <button onClick={() => navigate('/login')} style={styles.button}>
-          Login
+      <div style={{ marginTop: "2rem" }}>
+        <button
+          onClick={() => navigate("/auth/login")}
+          style={buttonStyle}
+        >
+          Log In
         </button>
-        <button onClick={() => navigate('/register')} style={{ ...styles.button, backgroundColor: '#28a745' }}>
-          Sign Up
+        <button
+          onClick={() => navigate("/auth/register")}
+          style={{ ...buttonStyle, marginLeft: "1rem" }}
+        >
+          Create Profile
+        </button>
+        <button
+          onClick={() => navigate("/gigs/public")}
+          style={{ ...buttonStyle, marginLeft: "1rem", backgroundColor: "#6f42c1" }}
+        >
+          Browse Gigs
         </button>
       </div>
     </div>
   );
 };
 
-const styles = {
-  container: {
-    textAlign: 'center',
-    padding: '3rem',
-  },
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '1rem',
-    marginTop: '2rem',
-  },
-  button: {
-    padding: '0.75rem 1.5rem',
-    fontSize: '1rem',
-    borderRadius: '5px',
-    border: 'none',
-    cursor: 'pointer',
-    backgroundColor: '#007bff',
-    color: 'white',
-  },
-} as const;
+const buttonStyle: React.CSSProperties = {
+  padding: "0.6rem 1.2rem",
+  fontSize: "1rem",
+  backgroundColor: "#007bff",
+  color: "white",
+  border: "none",
+  borderRadius: "4px",
+  cursor: "pointer",
+};
 
 export default HomePage;
