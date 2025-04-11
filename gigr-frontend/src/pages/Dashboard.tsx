@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface User {
   id: number;
@@ -13,6 +14,7 @@ interface User {
 const Dashboard: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -31,7 +33,6 @@ const Dashboard: React.FC = () => {
       .then((res) => {
         const raw = res.data;
 
-        
         const normalizedUser = {
           id: raw.ID,
           name: raw.Name,
@@ -40,7 +41,7 @@ const Dashboard: React.FC = () => {
           location: raw.Location,
           bio: raw.Bio,
         };
-    
+
         setUser(normalizedUser);
       })
       .catch((err) => {
@@ -59,8 +60,33 @@ const Dashboard: React.FC = () => {
       <p>Instrument: {user.instrument}</p>
       <p>Location: {user.location}</p>
       <p>Bio: {user.bio}</p>
+
+      <button
+        style={buttonStyle}
+        onClick={() => navigate("/gigs/create")}
+      >
+        Create a New Gig
+      </button>
+
+      <button
+        style={{ ...buttonStyle, backgroundColor: "#007bff", marginTop: "1rem" }}
+        onClick={() => navigate("/gigs/mine")}
+      >
+        View My Gigs
+      </button>
     </div>
   );
+};
+
+const buttonStyle: React.CSSProperties = {
+  marginTop: "2rem",
+  padding: "0.6rem 1.2rem",
+  fontSize: "1rem",
+  cursor: "pointer",
+  borderRadius: "4px",
+  border: "none",
+  backgroundColor: "#28a745",
+  color: "white",
 };
 
 export default Dashboard;
