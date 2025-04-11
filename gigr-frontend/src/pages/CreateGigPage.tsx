@@ -8,6 +8,7 @@ const CreateGigPage: React.FC = () => {
   const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
   const [instrument, setInstrument] = useState("");
+  const [status, setStatus] = useState("Available"); // Default status is "Available"
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -16,37 +17,23 @@ const CreateGigPage: React.FC = () => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-  
+
     const token = localStorage.getItem("token");
     const formattedDate = new Date(date).toISOString();
-  
+
     try {
-      const res = await axios.post(
+      await axios.post(
         "http://localhost:8080/gigs/",
-        {
-          title,
-          description,
-          location,
-          date: formattedDate, // fix: rename to "date"
-          instrument,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { title, description, location, date: formattedDate, instrument, status },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-  
-      const createdGigId = res.data.gig.id;
-  
       setSuccess("Gig created successfully!");
-      setTimeout(() => navigate(`/gigs/${createdGigId}`), 1500);
+      setTimeout(() => navigate("/gigs/mine"), 1500); // Redirect to "My Gigs" page
     } catch (err: any) {
       console.error("Gig creation failed:", err);
       setError(err.response?.data?.error || "Something went wrong.");
     }
   };
-  
 
   return (
     <div style={{ maxWidth: "600px", margin: "2rem auto" }}>
@@ -57,6 +44,14 @@ const CreateGigPage: React.FC = () => {
         <input type="text" placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} required style={inputStyle} />
         <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} required style={inputStyle} />
         <input type="text" placeholder="Instrument Needed" value={instrument} onChange={(e) => setInstrument(e.target.value)} required style={inputStyle} />
+
+        {/* Status Dropdown */}
+        <select value={status} onChange={(e) => setStatus(e.target.value)} style={inputStyle}>
+          <option value="Available">Available</option>
+          <option value="Pending">Pending</option>
+          <option value="Covered">Covered</option>
+        </select>
+
         <button type="submit" style={buttonStyle}>Create Gig</button>
       </form>
 

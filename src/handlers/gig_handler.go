@@ -189,10 +189,6 @@ func (h *GigHandler) UpdateGig(c *gin.Context) {
 		return
 	}
 
-	// No need to manually parse date; just use it as it is
-	// updatedData.Date is already of type time.Time, so it's ready to be saved as is
-
-	// Call service to handle the update
 	updatedGig, err := h.Service.UpdateGig(uint(id), user.ID, &updatedData)
 	if err != nil {
 		fmt.Println("Received error:", err) // Debug log for error

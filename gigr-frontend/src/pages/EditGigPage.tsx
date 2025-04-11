@@ -10,6 +10,7 @@ const EditGigPage: React.FC = () => {
     location: "",
     date: "",
     instrument: "",
+    status: "Available", // default status
   });
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -32,8 +33,9 @@ const EditGigPage: React.FC = () => {
           title: gigData.title,
           description: gigData.description,
           location: gigData.location,
-          date: new Date(gigData.date).toISOString().slice(0, 16), // Format for datetime-local input
+          date: new Date(gigData.date).toISOString().slice(0, 16),
           instrument: gigData.instrument,
+          status: gigData.status || "Available",
         });
       })
       .catch((err) => {
@@ -46,12 +48,7 @@ const EditGigPage: React.FC = () => {
     e.preventDefault();
     setError(null);
 
-    // Log the data being submitted to ensure it's correct
-    console.log("Submitting gig:", gig);
-
     const token = localStorage.getItem("token");
-
-    // Ensure the date is in the proper ISO format for backend storage
     const formattedDate = new Date(gig.date).toISOString();
 
     try {
@@ -61,8 +58,9 @@ const EditGigPage: React.FC = () => {
           title: gig.title,
           description: gig.description,
           location: gig.location,
-          date: formattedDate, // Send the formatted date
+          date: formattedDate,
           instrument: gig.instrument,
+          status: gig.status,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -120,6 +118,16 @@ const EditGigPage: React.FC = () => {
           required
           style={inputStyle}
         />
+        <select
+          value={gig.status}
+          onChange={(e) => setGig({ ...gig, status: e.target.value })}
+          required
+          style={inputStyle}
+        >
+          <option value="Available">Available</option>
+          <option value="Pending">Pending</option>
+          <option value="Covered">Covered</option>
+        </select>
         <button type="submit" style={buttonStyle}>
           Update Gig
         </button>
