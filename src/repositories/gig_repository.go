@@ -52,6 +52,15 @@ func (repo *GigRepository) GetGigsByUserID(userID uint) ([]models.Gig, error) {
 	return gigs, err
 }
 
+// GetPublicGigs returns gigs with status 'Available'
+func (r *GigRepository) GetPublicGigs() ([]models.Gig, error) {
+	var gigs []models.Gig
+	if err := r.DB.Where("status = ?", "Available").Find(&gigs).Error; err != nil {
+		return nil, err
+	}
+	return gigs, nil
+}
+
 func (repo *GigRepository) UpdateGig(existing *models.Gig, updated *models.Gig) (*models.Gig, error) {
 	existing.Title = updated.Title
 	existing.Description = updated.Description

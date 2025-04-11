@@ -49,6 +49,10 @@ func (s *GigService) GetGigsByUser(userID uint) ([]models.Gig, error) {
 	return s.Repo.GetGigsByUserID(userID)
 }
 
+func (s *GigService) GetPublicGigs() ([]models.Gig, error) {
+	return s.Repo.GetPublicGigs()
+}
+
 func (s *GigService) UpdateGig(gigID uint, userID uint, updated *models.Gig) (*models.Gig, error) {
 	// Only update if gig belongs to user
 	gig, err := s.Repo.GetGigByID(gigID)
