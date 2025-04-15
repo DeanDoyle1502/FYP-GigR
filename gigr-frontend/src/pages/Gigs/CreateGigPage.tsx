@@ -1,6 +1,18 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Layout from "../../components/Layout";
+import FormInput from "../../components/FormInput";
+import Button from "../../components/Button";
+import {
+  Box,
+  MenuItem,
+  Typography,
+  Select,
+  SelectChangeEvent,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
 
 const CreateGigPage: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -8,7 +20,7 @@ const CreateGigPage: React.FC = () => {
   const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
   const [instrument, setInstrument] = useState("");
-  const [status, setStatus] = useState("Available"); // Default status is "Available"
+  const [status, setStatus] = useState("Available");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -28,7 +40,7 @@ const CreateGigPage: React.FC = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSuccess("Gig created successfully!");
-      setTimeout(() => navigate("/gigs/mine"), 1500); // Redirect to "My Gigs" page
+      setTimeout(() => navigate("/gigs/mine"), 1500);
     } catch (err: any) {
       console.error("Gig creation failed:", err);
       setError(err.response?.data?.error || "Something went wrong.");
@@ -36,46 +48,70 @@ const CreateGigPage: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "2rem auto" }}>
-      <h2>Create a New Gig</h2>
-      <form onSubmit={handleSubmit}>
-        <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required style={inputStyle} />
-        <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} required style={{ ...inputStyle, height: "100px" }} />
-        <input type="text" placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} required style={inputStyle} />
-        <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} required style={inputStyle} />
-        <input type="text" placeholder="Instrument Needed" value={instrument} onChange={(e) => setInstrument(e.target.value)} required style={inputStyle} />
+    <Layout>
+      <Box maxWidth="600px" mx="auto" mt={4}>
+        <Typography variant="h4" gutterBottom>
+          Create a New Gig
+        </Typography>
 
-        {/* Status Dropdown */}
-        <select value={status} onChange={(e) => setStatus(e.target.value)} style={inputStyle}>
-          <option value="Available">Available</option>
-          <option value="Pending">Pending</option>
-          <option value="Covered">Covered</option>
-        </select>
+        <form onSubmit={handleSubmit}>
+          <FormInput
+            label="Title"
+            value={title}
+            onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setTitle(e.target.value)}
+            required
+          />
+          <FormInput
+            label="Description"
+            value={description}
+            onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setDescription(e.target.value)}
+            multiline
+            rows={3}
+            required
+          />
+          <FormInput
+            label="Location"
+            value={location}
+            onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setLocation(e.target.value)}
+            required
+          />
+          <FormInput
+            type="datetime-local"
+            label="Date"
+            InputLabelProps={{ shrink: true }}
+            value={date}
+            onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setDate(e.target.value)}
+            required
+          />
+          <FormInput
+            label="Instrument Needed"
+            value={instrument}
+            onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setInstrument(e.target.value)}
+            required
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Status</InputLabel>
+            <Select
+              label="Status"
+              value={status}
+              onChange={(e: SelectChangeEvent) => setStatus(e.target.value)}
+            >
+              <MenuItem value="Available">Available</MenuItem>
+              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="Covered">Covered</MenuItem>
+            </Select>
+          </FormControl>
 
-        <button type="submit" style={buttonStyle}>Create Gig</button>
-      </form>
+          <Button type="submit" fullWidth>
+            Create Gig
+          </Button>
+        </form>
 
-      {success && <p style={{ color: "green" }}>{success}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
+        {success && <Typography color="success.main" mt={2}>{success}</Typography>}
+        {error && <Typography color="error" mt={2}>{error}</Typography>}
+      </Box>
+    </Layout>
   );
-};
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "0.5rem",
-  marginBottom: "1rem",
-  borderRadius: "4px",
-  border: "1px solid #ccc",
-};
-
-const buttonStyle: React.CSSProperties = {
-  padding: "0.6rem 1.2rem",
-  backgroundColor: "#007bff",
-  color: "#fff",
-  border: "none",
-  borderRadius: "4px",
-  cursor: "pointer",
 };
 
 export default CreateGigPage;

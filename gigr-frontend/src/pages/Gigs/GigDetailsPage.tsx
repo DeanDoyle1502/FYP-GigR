@@ -1,22 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-
-interface Gig {
-  id: number;
-  title: string;
-  description: string;
-  location: string;
-  date: string;
-  instrument: string;
-  status: string;
-}
+import Layout from "../../components/Layout";
+import Button from "../../components/Button";
+import { Box, Typography, Paper } from "@mui/material";
+import { Gig } from "../../types/gig";
 
 const GigDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [gig, setGig] = useState<Gig | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -28,9 +22,7 @@ const GigDetailPage: React.FC = () => {
 
     axios
       .get(`http://localhost:8080/gigs/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setGig(res.data))
       .catch((err) => {
@@ -40,16 +32,13 @@ const GigDetailPage: React.FC = () => {
   }, [id]);
 
   const handleDelete = async () => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this gig?");
-    if (!confirmDelete) return;
+    if (!window.confirm("Are you sure you want to delete this gig?")) return;
 
     const token = localStorage.getItem("token");
-
     try {
       await axios.delete(`http://localhost:8080/gigs/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       alert("Gig deleted.");
       navigate("/gigs/mine");
     } catch (err: any) {
@@ -58,41 +47,40 @@ const GigDetailPage: React.FC = () => {
     }
   };
 
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
-  if (!gig) return <p>Loading gig...</p>;
-
   return (
-    <div style={{ maxWidth: "800px", margin: "2rem auto" }}>
-      <h2>{gig.title}</h2>
-      <p><strong>Date:</strong> {new Date(gig.date).toLocaleString()}</p>
-      <p><strong>Location:</strong> {gig.location}</p>
-      <p><strong>Instrument Needed:</strong> {gig.instrument}</p>
-      <p><strong>Status:</strong> {gig.status}</p>
-      <p>{gig.description}</p>
+    <Layout>
+      <Box maxWidth="700px" mx="auto" mt={5}>
+        {error && <Typography color="error">{error}</Typography>}
+        {!gig ? (
+          <Typography>Loading gig...</Typography>
+        ) : (
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+            <Typography variant="h4" gutterBottom>
+              {gig.title}
+            </Typography>
+            <Typography><strong>Date:</strong> {new Date(gig.date).toLocaleString()}</Typography>
+            <Typography><strong>Location:</strong> {gig.location}</Typography>
+            <Typography><strong>Instrument:</strong> {gig.instrument}</Typography>
+            <Typography><strong>Status:</strong> {gig.status}</Typography>
+            <Typography mt={2}>{gig.description}</Typography>
 
-      <div style={{ marginTop: "2rem" }}>
-        <button onClick={() => navigate("/dashboard")} style={buttonStyle}>Back to Dashboard</button>
-        <button onClick={() => navigate("/gigs/mine")} style={{ ...buttonStyle, marginLeft: "1rem", backgroundColor: "#007bff" }}>
-          View My Gigs
-        </button>
-        <button onClick={handleDelete} style={{ ...buttonStyle, marginLeft: "1rem", backgroundColor: "#dc3545" }}>
-          Delete Gig
-        </button>
-        <button onClick={() => navigate(`/gigs/${id}/edit`)} style={{ ...buttonStyle, marginLeft: "1rem", backgroundColor: "#ffc107", color: "#000" }}>
-          Edit Gig
-        </button>
-      </div>
-    </div>
+            <Box display="flex" gap={2} mt={4} flexWrap="wrap">
+              <Button onClick={() => navigate("/dashboard")}>Dashboard</Button>
+              <Button onClick={() => navigate("/gigs/mine")} style={{ backgroundColor: "#007bff" }}>
+                My Gigs
+              </Button>
+              <Button onClick={handleDelete} style={{ backgroundColor: "#dc3545" }}>
+                Delete Gig
+              </Button>
+              <Button onClick={() => navigate(`/gigs/${id}/edit`)} style={{ backgroundColor: "#ffc107", color: "#000" }}>
+                Edit Gig
+              </Button>
+            </Box>
+          </Paper>
+        )}
+      </Box>
+    </Layout>
   );
-};
-
-const buttonStyle: React.CSSProperties = {
-  padding: "0.5rem 1rem",
-  backgroundColor: "#28a745",
-  color: "white",
-  border: "none",
-  borderRadius: "4px",
-  cursor: "pointer",
 };
 
 export default GigDetailPage;
