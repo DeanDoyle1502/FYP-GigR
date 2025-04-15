@@ -39,6 +39,8 @@ func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHand
 
 	}
 
+	r.GET("/gigs/public", gigHandler.GetPublicGigs)
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",

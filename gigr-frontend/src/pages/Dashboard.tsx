@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Layout from "../components/Layout";
+import Button from "../components/Button";
+import { Container, Typography, Stack } from "@mui/material";
 
 interface User {
   id: number;
@@ -26,13 +29,10 @@ const Dashboard: React.FC = () => {
 
     axios
       .get("http://localhost:8080/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
         const raw = res.data;
-
         const normalizedUser = {
           id: raw.ID,
           name: raw.Name,
@@ -41,7 +41,6 @@ const Dashboard: React.FC = () => {
           location: raw.Location,
           bio: raw.Bio,
         };
-
         setUser(normalizedUser);
       })
       .catch((err) => {
@@ -50,43 +49,51 @@ const Dashboard: React.FC = () => {
       });
   }, []);
 
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
-  if (!user) return <p>Loading...</p>;
+  if (error) {
+    return (
+      <Layout>
+        <Container>
+          <Typography color="error">{error}</Typography>
+        </Container>
+      </Layout>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Layout>
+        <Container>
+          <Typography>Loading...</Typography>
+        </Container>
+      </Layout>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: "600px", margin: "2rem auto", textAlign: "center" }}>
-      <h1>Welcome back, {user.name || user.email}!</h1>
-      <p>Email: {user.email}</p>
-      <p>Instrument: {user.instrument}</p>
-      <p>Location: {user.location}</p>
-      <p>Bio: {user.bio}</p>
+    <Layout>
+      <Container maxWidth="sm" sx={{ textAlign: "center", mt: 4 }}>
+        <Typography variant="h4" fontWeight="bold" gutterBottom>
+          Welcome back, {user.name || user.email}!
+        </Typography>
+        <Typography>Email: {user.email}</Typography>
+        <Typography>Instrument: {user.instrument}</Typography>
+        <Typography>Location: {user.location}</Typography>
+        <Typography>Bio: {user.bio}</Typography>
 
-      <button
-        style={buttonStyle}
-        onClick={() => navigate("/gigs/create")}
-      >
-        Create a New Gig
-      </button>
-
-      <button
-        style={{ ...buttonStyle, backgroundColor: "#007bff", marginTop: "1rem" }}
-        onClick={() => navigate("/gigs/mine")}
-      >
-        View My Gigs
-      </button>
-    </div>
+        <Stack spacing={2} direction="row" justifyContent="center" mt={4} flexWrap="wrap">
+          <Button onClick={() => navigate("/gigs/create")}>
+            Create a New Gig
+          </Button>
+          <Button onClick={() => navigate("/gigs/mine")} color="primary">
+            View My Gigs
+          </Button>
+          <Button onClick={() => navigate("/gigs/public")} color="secondary">
+            Browse Available Gigs
+          </Button>
+        </Stack>
+      </Container>
+    </Layout>
   );
-};
-
-const buttonStyle: React.CSSProperties = {
-  marginTop: "2rem",
-  padding: "0.6rem 1.2rem",
-  fontSize: "1rem",
-  cursor: "pointer",
-  borderRadius: "4px",
-  border: "none",
-  backgroundColor: "#28a745",
-  color: "white",
 };
 
 export default Dashboard;

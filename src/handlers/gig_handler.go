@@ -149,6 +149,15 @@ func (h *GigHandler) GetMyGigs(c *gin.Context) {
 	c.JSON(http.StatusOK, gigs)
 }
 
+func (h *GigHandler) GetPublicGigs(c *gin.Context) {
+	gigs, err := h.Service.GetPublicGigs()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch public gigs"})
+		return
+	}
+	c.JSON(http.StatusOK, gigs)
+}
+
 func (h *GigHandler) UpdateGig(c *gin.Context) {
 	claims, exists := c.Get("user")
 	if !exists {
