@@ -81,7 +81,7 @@ func (h *GigHandler) GetGig(c *gin.Context) {
 		return
 	}
 
-	gig, err := h.Service.GetGig(uint(id))
+	gig, err := h.Service.GetGigWithUser(uint(id)) // Use the one that preloads User
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Gig not found"})
 		return

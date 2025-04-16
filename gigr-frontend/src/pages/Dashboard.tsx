@@ -34,12 +34,12 @@ const Dashboard: React.FC = () => {
       .then((res) => {
         const raw = res.data;
         const normalizedUser = {
-          id: raw.ID,
-          name: raw.Name,
-          email: raw.Email,
-          instrument: raw.Instrument,
-          location: raw.Location,
-          bio: raw.Bio,
+          id: raw.id,
+          name: raw.name,
+          email: raw.email,
+          instrument: raw.instrument,
+          location: raw.location,
+          bio: raw.bio,
         };
         setUser(normalizedUser);
       })

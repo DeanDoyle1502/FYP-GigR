@@ -38,7 +38,6 @@ func AuthMiddleware() gin.HandlerFunc {
 		fmt.Println("🔐 AuthMiddleware triggered")
 
 		authHeader := c.GetHeader("Authorization")
-		fmt.Println("📦 Authorization header received:", authHeader)
 
 		if authHeader == "" {
 			fmt.Println("❌ No Authorization header found")
@@ -56,7 +55,6 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		tokenString := parts[1]
-		fmt.Println("🔑 Token string to parse:", tokenString)
 
 		token, err := jwt.Parse(tokenString, jwks.Keyfunc)
 		if err != nil || !token.Valid {
@@ -73,8 +71,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
-		fmt.Println("✅ Token claims:", claims)
 
 		sub, ok := claims["sub"].(string)
 		if !ok || sub == "" {
