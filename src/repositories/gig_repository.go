@@ -38,6 +38,24 @@ func (repo *GigRepository) ApplyForGig(application *models.GigApplication) error
 	return repo.DB.Create(application).Error
 }
 
+// Check if a user has already applied for a gig
+func (r *GigRepository) HasUserAlreadyApplied(gigID, userID uint) (bool, error) {
+	var count int64
+	err := r.DB.Model(&models.GigApplication{}).
+		Where("gig_id = ? AND musician_id = ?", gigID, userID).
+		Count(&count).Error
+	return count > 0, err
+}
+
+// Get all applications for a Gig
+func (repo *GigRepository) GetApplicationsForGig(gigID uint) ([]models.GigApplication, error) {
+	var apps []models.GigApplication
+	if err := repo.DB.Where("gig_id = ?", gigID).Find(&apps).Error; err != nil {
+		return nil, err
+	}
+	return apps, nil
+}
+
 // Accept a Musician for a Gig
 func (repo *GigRepository) AcceptMusicianForGig(gigID uint, musicianID uint) error {
 	return repo.DB.Model(&models.GigApplication{}).

@@ -18,7 +18,9 @@ type Gig struct {
 
 type GigApplication struct {
 	ID         uint   `gorm:"primaryKey" json:"id"`
-	GigID      uint   `gorm:"not null" json:"gig_id"`
-	MusicianID uint   `gorm:"not null" json:"musician_id"`
+	GigID      uint   `gorm:"not null;index" json:"gig_id"`
+	MusicianID uint   `gorm:"not null;index" json:"musician_id"`
+	Gig        Gig    `gorm:"foreignKey:GigID;constraint:OnDelete:CASCADE"`
+	Musician   User   `gorm:"foreignKey:MusicianID;constraint:OnDelete:CASCADE"`
 	Status     string `gorm:"size:50;default:'pending'" json:"status"` // pending, accepted, rejected
 }

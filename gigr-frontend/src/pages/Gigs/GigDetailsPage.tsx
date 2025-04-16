@@ -19,6 +19,7 @@ const GigDetailPage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [hasApplied, setHasApplied] = useState<boolean>(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -48,9 +49,6 @@ const GigDetailPage: React.FC = () => {
         setUser(userData);
         setGig(gigData);
         setIsOwner(userData.id === gigData.user?.id);
-
-        console.log("User ID:", userData.id, typeof userData.id);
-        console.log("Gig Poster ID:", gigData.user?.id, typeof gigData.user?.id);
       })
       .catch((err) => {
         console.error("Error loading gig or user:", err);
@@ -71,6 +69,26 @@ const GigDetailPage: React.FC = () => {
     } catch (err) {
       console.error("Failed to delete gig:", err);
       alert("Failed to delete gig.");
+    }
+  };
+
+  const handleApply = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      await axios.post(
+        `http://localhost:8080/gigs/${id}/apply`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      alert("Application submitted!");
+      setHasApplied(true);
+    } catch (err: any) {
+      console.error("Failed to apply for gig:", err);
+      alert(
+        err.response?.data?.error || "Failed to apply. Try again or check console."
+      );
     }
   };
 
@@ -107,6 +125,21 @@ const GigDetailPage: React.FC = () => {
                     Edit Gig
                   </Button>
                 </>
+              )}
+
+              {!isOwner && gig.status === "Available" && !hasApplied && (
+                <Button
+                  onClick={handleApply}
+                  style={{ backgroundColor: "#28a745", color: "#fff" }}
+                >
+                  Apply for Gig
+                </Button>
+              )}
+
+              {!isOwner && hasApplied && (
+                <Typography mt={2} color="primary">
+                  You've already applied to this gig.
+                </Typography>
               )}
             </Box>
           </Paper>
