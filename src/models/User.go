@@ -1,12 +1,12 @@
 package models
 
 type User struct {
-	ID         uint   `gorm:"primaryKey"`
-	Name       string `gorm:"size:255"`
-	Email      string `gorm:"unique;not null"`
-	Password   string
-	CognitoSub string `gorm:"uniqueIndex"`
-	Instrument string `gorm:"size:100"`
-	Location   string `gorm:"size:255"`
-	Bio        string `gorm:"type:text"`
+	ID         uint   `gorm:"primaryKey" json:"id"`
+	Name       string `gorm:"size:255" json:"name"`
+	Email      string `gorm:"unique;not null" json:"email"`
+	Password   string `json:"-"`
+	CognitoSub string `gorm:"uniqueIndex" json:"cognito_sub"`
+	Instrument string `gorm:"size:100" json:"instrument"`
+	Location   string `gorm:"size:255" json:"location"`
+	Bio        string `gorm:"type:text" json:"bio"`
 }

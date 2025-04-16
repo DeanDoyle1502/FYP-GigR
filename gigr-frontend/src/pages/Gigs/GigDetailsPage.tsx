@@ -6,28 +6,55 @@ import Button from "../../components/Button";
 import { Box, Typography, Paper } from "@mui/material";
 import { Gig } from "../../types/gig";
 
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
 const GigDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [gig, setGig] = useState<Gig | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       setError("You must be logged in to view this gig.");
       return;
     }
 
-    axios
-      .get(`http://localhost:8080/gigs/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+    const fetchGig = axios.get(`http://localhost:8080/gigs/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const fetchUser = axios.get(`http://localhost:8080/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    Promise.all([fetchGig, fetchUser])
+      .then(([gigRes, userRes]) => {
+        const userData = {
+          id: userRes.data.id || userRes.data.ID,
+          name: userRes.data.name || userRes.data.Name,
+          email: userRes.data.email || userRes.data.Email,
+        };
+
+        const gigData = gigRes.data;
+
+        setUser(userData);
+        setGig(gigData);
+        setIsOwner(userData.id === gigData.user?.id);
+
+        console.log("User ID:", userData.id, typeof userData.id);
+        console.log("Gig Poster ID:", gigData.user?.id, typeof gigData.user?.id);
       })
-      .then((res) => setGig(res.data))
       .catch((err) => {
-        console.error("Error fetching gig:", err);
-        setError("Could not load gig.");
+        console.error("Error loading gig or user:", err);
+        setError("Could not load gig or user.");
       });
   }, [id]);
 
@@ -41,7 +68,7 @@ const GigDetailPage: React.FC = () => {
       });
       alert("Gig deleted.");
       navigate("/gigs/mine");
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to delete gig:", err);
       alert("Failed to delete gig.");
     }
@@ -62,6 +89,7 @@ const GigDetailPage: React.FC = () => {
             <Typography><strong>Location:</strong> {gig.location}</Typography>
             <Typography><strong>Instrument:</strong> {gig.instrument}</Typography>
             <Typography><strong>Status:</strong> {gig.status}</Typography>
+            <Typography><strong>Posted by:</strong> {gig.user?.name || gig.user?.email}</Typography>
             <Typography mt={2}>{gig.description}</Typography>
 
             <Box display="flex" gap={2} mt={4} flexWrap="wrap">
@@ -69,12 +97,17 @@ const GigDetailPage: React.FC = () => {
               <Button onClick={() => navigate("/gigs/mine")} style={{ backgroundColor: "#007bff" }}>
                 My Gigs
               </Button>
-              <Button onClick={handleDelete} style={{ backgroundColor: "#dc3545" }}>
-                Delete Gig
-              </Button>
-              <Button onClick={() => navigate(`/gigs/${id}/edit`)} style={{ backgroundColor: "#ffc107", color: "#000" }}>
-                Edit Gig
-              </Button>
+
+              {isOwner && (
+                <>
+                  <Button onClick={handleDelete} style={{ backgroundColor: "#dc3545" }}>
+                    Delete Gig
+                  </Button>
+                  <Button onClick={() => navigate(`/gigs/${id}/edit`)} style={{ backgroundColor: "#ffc107", color: "#000" }}>
+                    Edit Gig
+                  </Button>
+                </>
+              )}
             </Box>
           </Paper>
         )}

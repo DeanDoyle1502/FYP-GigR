@@ -76,3 +76,11 @@ func (repo *GigRepository) UpdateGig(existing *models.Gig, updated *models.Gig) 
 func (repo *GigRepository) DeleteGig(id uint) error {
 	return repo.DB.Delete(&models.Gig{}, id).Error
 }
+
+func (repo *GigRepository) GetGigWithUserByID(id uint) (*models.Gig, error) {
+	var gig models.Gig
+	if err := repo.DB.Preload("User").First(&gig, id).Error; err != nil {
+		return nil, err
+	}
+	return &gig, nil
+}

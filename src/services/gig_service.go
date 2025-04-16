@@ -29,9 +29,14 @@ func (s *GigService) GetAllGigs() ([]models.Gig, error) {
 	return s.Repo.GetAllGigs()
 }
 
-// Retrieve a single gig
+// Retrieve a single gig (basic, no relations)
 func (s *GigService) GetGig(id uint) (*models.Gig, error) {
 	return s.Repo.GetGigByID(id)
+}
+
+// Retrieve a single gig WITH user data (for frontend)
+func (s *GigService) GetGigWithUser(id uint) (*models.Gig, error) {
+	return s.Repo.GetGigWithUserByID(id)
 }
 
 // Apply for a gig
@@ -49,12 +54,13 @@ func (s *GigService) GetGigsByUser(userID uint) ([]models.Gig, error) {
 	return s.Repo.GetGigsByUserID(userID)
 }
 
+// Get gigs with status = 'Available'
 func (s *GigService) GetPublicGigs() ([]models.Gig, error) {
 	return s.Repo.GetPublicGigs()
 }
 
+// Update a gig (only if the user owns it)
 func (s *GigService) UpdateGig(gigID uint, userID uint, updated *models.Gig) (*models.Gig, error) {
-	// Only update if gig belongs to user
 	gig, err := s.Repo.GetGigByID(gigID)
 	if err != nil {
 		return nil, err
@@ -66,6 +72,7 @@ func (s *GigService) UpdateGig(gigID uint, userID uint, updated *models.Gig) (*m
 	return s.Repo.UpdateGig(gig, updated)
 }
 
+// Delete a gig (only if the user owns it)
 func (s *GigService) DeleteGig(gigID uint, userID uint) error {
 	gig, err := s.Repo.GetGigByID(gigID)
 	if err != nil {

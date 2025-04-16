@@ -7,6 +7,7 @@ import (
 type Gig struct {
 	ID          uint      `gorm:"primaryKey" json:"id"`
 	UserID      uint      `gorm:"not null" json:"user_id"` // Owner of the gig (Act/Band)
+	User        User      `gorm:"foreignKey:UserID" json:"user"`
 	Title       string    `gorm:"size:255;not null" json:"title"`
 	Description string    `gorm:"type:text" json:"description"`
 	Location    string    `gorm:"size:255;not null" json:"location"`
