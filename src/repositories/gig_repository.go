@@ -63,11 +63,25 @@ func (repo *GigRepository) AcceptMusicianForGig(gigID uint, musicianID uint) err
 		Update("status", "accepted").Error
 }
 
+// Update Gig Status
+func (repo *GigRepository) UpdateGigStatus(gigID uint, status string) error {
+	return repo.DB.Model(&models.Gig{}).
+		Where("id = ?", gigID).
+		Update("status", status).Error
+}
+
 // Get Gigs by User ID
 func (repo *GigRepository) GetGigsByUserID(userID uint) ([]models.Gig, error) {
 	var gigs []models.Gig
 	err := repo.DB.Where("user_id = ?", userID).Find(&gigs).Error
 	return gigs, err
+}
+
+// Get all applications for a user
+func (r *GigRepository) GetApplicationsByUser(userID uint) ([]models.GigApplication, error) {
+	var apps []models.GigApplication
+	err := r.DB.Preload("Gig").Where("musician_id = ?", userID).Find(&apps).Error
+	return apps, err
 }
 
 // GetPublicGigs returns gigs with status 'Available'

@@ -10,6 +10,8 @@ import MyGigsPage from './pages/Gigs/MyGigsPage';
 import GigDetailPage from './pages/Gigs/GigDetailsPage';
 import EditGigPage from './pages/Gigs/EditGigPage';
 import PublicGigsPage from './pages/Gigs/PublicGigPage';
+import UserProfilePage from './pages/User/UserProfilePage';
+import MyApplicationsPage from './pages/Gigs/MyApplicationsPage';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         <Route path="/gigs/:id" element={<GigDetailPage />} />
         <Route path="/gigs/:id/edit" element={<EditGigPage />} />
         <Route path="/gigs/public" element={<PublicGigsPage />} />
+        <Route path="/users/:id" element={<UserProfilePage />} />
+        <Route path="/gigs/applications/mine" element={<MyApplicationsPage />} />
       </Routes>
     </Router>
   );

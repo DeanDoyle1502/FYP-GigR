@@ -26,6 +26,9 @@ const NavBar: React.FC = () => {
             <Button color="inherit" onClick={() => navigate("/gigs/mine")}>
               My Gigs
             </Button>
+            <Button color="inherit" onClick={() => navigate("/gigs/applications")}>
+              My Applications
+            </Button>
             <Button color="inherit" onClick={() => navigate("/gigs/public")}>
               Public Gigs
             </Button>

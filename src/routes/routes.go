@@ -30,11 +30,14 @@ func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHand
 	{
 		gigs.POST("/", gigHandler.CreateGig)
 		gigs.GET("/", gigHandler.GetAllGigs)
-		gigs.GET("/:id", gigHandler.GetGig)
 		gigs.GET("/mine", gigHandler.GetMyGigs)
-		gigs.POST("/:id/apply", gigHandler.ApplyForGig)
+
+		gigs.GET("/applications/mine", gigHandler.GetMyApplications)
+		gigs.POST("/:gigID/apply", gigHandler.ApplyForGig)
 		gigs.GET("/:id/applications", gigHandler.GetApplicationsForGig)
-		gigs.POST("/:id/accept/:musicianID", gigHandler.AcceptMusicianForGig)
+		gigs.POST("/:gigID/accept/:musicianID", gigHandler.AcceptMusicianForGig)
+
+		gigs.GET("/:id", gigHandler.GetGig)
 		gigs.PUT("/:id", gigHandler.UpdateGig)
 		gigs.DELETE("/:id", gigHandler.DeleteGig)
 

@@ -111,7 +111,7 @@ func (h *GigHandler) ApplyForGig(c *gin.Context) {
 	}
 
 	// Get gig ID from path
-	gigIDParam := c.Param("id")
+	gigIDParam := c.Param("gigID")
 	gigID, err := strconv.Atoi(gigIDParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid gig ID"})
@@ -174,15 +174,94 @@ func (h *GigHandler) GetApplicationsForGig(c *gin.Context) {
 
 // Accept Musician for Gig
 func (h *GigHandler) AcceptMusicianForGig(c *gin.Context) {
-	gigID, _ := strconv.Atoi(c.Param("gigID"))
-	musicianID, _ := strconv.Atoi(c.Param("musicianID"))
 
+	fmt.Println("gigID:", c.Param("gigID"))
+	fmt.Println("musicianID:", c.Param("musicianID"))
+
+	gigIDStr := c.Param("gigID")
+	musicianIDStr := c.Param("musicianID")
+
+	gigID, err := strconv.Atoi(gigIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid gig ID"})
+		return
+	}
+
+	musicianID, err := strconv.Atoi(musicianIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid musician ID"})
+		return
+	}
+
+	// Confirm user owns the gig
+	claims, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	jwtClaims := claims.(jwt.MapClaims)
+	sub := jwtClaims["sub"].(string)
+	email := jwtClaims["email"].(string)
+
+	user, err := h.Service.AuthService.GetOrCreateUser(sub, email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not load user"})
+		return
+	}
+
+	// Fetch the gig to check ownership
+	gig, err := h.Service.GetGig(uint(gigID))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Gig not found"})
+		return
+	}
+
+	if gig.UserID != user.ID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You do not own this gig"})
+		return
+	}
+
+	// Accept the musician
 	if err := h.Service.AcceptMusicianForGig(uint(gigID), uint(musicianID)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to accept musician"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Musician accepted for gig"})
+	// Optionally update gig status
+	if err := h.Service.Repo.UpdateGigStatus(uint(gigID), "Covered"); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update gig status"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Musician accepted and gig marked as covered"})
+}
+
+// Get My Applications
+func (h *GigHandler) GetMyApplications(c *gin.Context) {
+	claims, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	jwtClaims := claims.(jwt.MapClaims)
+	sub := jwtClaims["sub"].(string)
+	email := jwtClaims["email"].(string)
+
+	user, err := h.Service.AuthService.GetOrCreateUser(sub, email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not load user"})
+		return
+	}
+
+	apps, err := h.Service.GetApplicationsByUser(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch applications"})
+		return
+	}
+
+	c.JSON(http.StatusOK, apps)
 }
 
 // Get My Gigs

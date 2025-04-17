@@ -3,13 +3,20 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Layout from "../../components/Layout";
 import Button from "../../components/Button";
-import { Box, Typography, Paper } from "@mui/material";
+import { Box, Typography, Paper, Stack } from "@mui/material";
 import { Gig } from "../../types/gig";
 
 interface User {
   id: number;
   name: string;
   email: string;
+}
+
+interface Application {
+  id: number;
+  musician_id: number;
+  status: string;
+  musician?: User;
 }
 
 const GigDetailPage: React.FC = () => {
@@ -20,6 +27,7 @@ const GigDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [hasApplied, setHasApplied] = useState<boolean>(false);
+  const [applications, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -37,7 +45,7 @@ const GigDetailPage: React.FC = () => {
     });
 
     Promise.all([fetchGig, fetchUser])
-      .then(([gigRes, userRes]) => {
+      .then(async ([gigRes, userRes]) => {
         const userData = {
           id: userRes.data.id || userRes.data.ID,
           name: userRes.data.name || userRes.data.Name,
@@ -48,7 +56,39 @@ const GigDetailPage: React.FC = () => {
 
         setUser(userData);
         setGig(gigData);
-        setIsOwner(userData.id === gigData.user?.id);
+        const owner = userData.id === gigData.user?.id;
+        setIsOwner(owner);
+
+        if (owner) {
+          const appsRes = await axios.get(`http://localhost:8080/gigs/${gigData.id}/applications`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          const appsWithProfiles = await Promise.all(
+            appsRes.data.map(async (app: Application) => {
+              const userRes = await axios.get(`http://localhost:8080/users/${app.musician_id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              return {
+                ...app,
+                musician: {
+                  id: userRes.data.id,
+                  name: userRes.data.name,
+                  email: userRes.data.email,
+                },
+              };
+            })
+          );
+
+          setApplications(appsWithProfiles);
+        } else {
+          // Check if user already applied
+          const applied = await axios.get(`http://localhost:8080/gigs/${gigData.id}/applications`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const has = applied.data.some((app: Application) => app.musician_id === userData.id);
+          setHasApplied(has);
+        }
       })
       .catch((err) => {
         console.error("Error loading gig or user:", err);
@@ -78,20 +118,43 @@ const GigDetailPage: React.FC = () => {
       await axios.post(
         `http://localhost:8080/gigs/${id}/apply`,
         {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       alert("Application submitted!");
       setHasApplied(true);
     } catch (err: any) {
       console.error("Failed to apply for gig:", err);
-      alert(
-        err.response?.data?.error || "Failed to apply. Try again or check console."
-      );
+      alert(err.response?.data?.error || "Failed to apply. Try again later.");
     }
   };
 
+  const handleAccept = async (musicianId: number) => {
+    const token = localStorage.getItem("token");
+    try {
+      await axios.post(
+        `http://localhost:8080/gigs/${id}/accept/${musicianId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Musician accepted!");
+  
+      // Update gig status locally to reflect change in UI
+      setGig((prev) => prev ? { ...prev, status: "Covered" } : prev);
+  
+      // Optionally, update application status locally
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.musician_id === musicianId
+            ? { ...app, status: "accepted" }
+            : { ...app, status: "rejected" }
+        )
+      );
+    } catch (err) {
+      console.error("Failed to accept musician:", err);
+      alert("Could not accept musician.");
+    }
+  };
+  
   return (
     <Layout>
       <Box maxWidth="700px" mx="auto" mt={5}>
@@ -142,6 +205,35 @@ const GigDetailPage: React.FC = () => {
                 </Typography>
               )}
             </Box>
+
+            {isOwner && applications.length > 0 && (
+              <Box mt={5}>
+                <Typography variant="h6" gutterBottom>
+                  Applications
+                </Typography>
+                {applications.map((app) => (
+                  <Paper key={app.id} sx={{ p: 2, mb: 2, backgroundColor: "#f9f9f9" }}>
+                    <Typography><strong>Name:</strong> {app.musician?.name}</Typography>
+                    <Typography><strong>Email:</strong> {app.musician?.email}</Typography>
+                    <Typography><strong>Status:</strong> {app.status}</Typography>
+                    <Stack direction="row" spacing={2} mt={1}>
+                      <Button
+                        onClick={() => handleAccept(app.musician_id)}
+                        style={{ backgroundColor: "#28a745" }}
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        onClick={() => navigate(`/users/${app.musician_id}`)}
+                        style={{ backgroundColor: "#6c757d" }}
+                      >
+                        View Profile
+                      </Button>
+                    </Stack>
+                  </Paper>
+                ))}
+              </Box>
+            )}
           </Paper>
         )}
       </Box>
