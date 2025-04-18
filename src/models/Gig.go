@@ -6,19 +6,20 @@ import (
 
 type Gig struct {
 	ID          uint      `gorm:"primaryKey" json:"id"`
-	UserID      uint      `gorm:"not null" json:"user_id"` // Owner of the gig (Act/Band)
+	UserID      uint      `gorm:"not null" json:"user_id"`
 	User        User      `gorm:"foreignKey:UserID" json:"user"`
 	Title       string    `gorm:"size:255;not null" json:"title"`
 	Description string    `gorm:"type:text" json:"description"`
 	Location    string    `gorm:"size:255;not null" json:"location"`
 	Date        time.Time `json:"date"`
-	Instrument  string    `gorm:"size:100;not null" json:"instrument"`  // Required instrument
-	Status      string    `gorm:"size:50;default:'open'" json:"status"` // open, filled, closed
+	Instrument  string    `gorm:"size:100;not null" json:"instrument"`
+	Status      string    `gorm:"size:50;default:'open'" json:"status"`
 }
 
 type GigApplication struct {
 	ID         uint   `gorm:"primaryKey" json:"id"`
 	GigID      uint   `gorm:"not null" json:"gig_id"`
+	Gig        Gig    `gorm:"foreignKey:GigID" json:"gig"`
 	MusicianID uint   `gorm:"not null" json:"musician_id"`
-	Status     string `gorm:"size:50;default:'pending'" json:"status"` // pending, accepted, rejected
+	Status     string `gorm:"size:50;default:'pending'" json:"status"`
 }

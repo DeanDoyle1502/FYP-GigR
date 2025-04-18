@@ -44,9 +44,26 @@ func (s *GigService) ApplyForGig(application *models.GigApplication) error {
 	return s.Repo.ApplyForGig(application)
 }
 
+func (s *GigService) HasUserAlreadyApplied(gigID, userID uint) (bool, error) {
+	return s.Repo.HasUserAlreadyApplied(gigID, userID)
+}
+
+// Get all applications for a gig
+func (s *GigService) GetApplicationsForGig(gigID uint) ([]models.GigApplication, error) {
+	return s.Repo.GetApplicationsForGig(gigID)
+}
+
+// Get all applications for a user
+func (s *GigService) GetApplicationsByUser(userID uint) ([]models.GigApplication, error) {
+	return s.Repo.GetApplicationsByUser(userID)
+}
+
 // Accept a musician for a gig
-func (s *GigService) AcceptMusicianForGig(gigID uint, musicianID uint) error {
-	return s.Repo.AcceptMusicianForGig(gigID, musicianID)
+func (s *GigService) AcceptMusicianForGig(gigID, musicianID uint) error {
+	if err := s.Repo.AcceptMusicianForGig(gigID, musicianID); err != nil {
+		return err
+	}
+	return s.Repo.UpdateGigStatus(gigID, "Covered")
 }
 
 // Get gigs by user ID
