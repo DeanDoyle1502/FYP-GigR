@@ -21,6 +21,5 @@ type GigApplication struct {
 	GigID      uint   `gorm:"not null" json:"gig_id"`
 	Gig        Gig    `gorm:"foreignKey:GigID" json:"gig"`
 	MusicianID uint   `gorm:"not null" json:"musician_id"`
-	Musician   User   `gorm:"foreignKey:MusicianID" json:"-"`
 	Status     string `gorm:"size:50;default:'pending'" json:"status"`
 }

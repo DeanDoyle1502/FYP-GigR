@@ -19,7 +19,7 @@ interface Application {
   musician?: User;
 }
 
-const GigDetailPage: React.FC = () => {
+const GigDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [gig, setGig] = useState<Gig | null>(null);
@@ -129,32 +129,32 @@ const GigDetailPage: React.FC = () => {
   };
 
   const handleAccept = async (musicianId: number) => {
-    const token = localStorage.getItem("token");
-    try {
-      await axios.post(
-        `http://localhost:8080/gigs/${id}/accept/${musicianId}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      alert("Musician accepted!");
-  
-      // Update gig status locally to reflect change in UI
-      setGig((prev) => prev ? { ...prev, status: "Covered" } : prev);
-  
-      // Optionally, update application status locally
-      setApplications((prev) =>
-        prev.map((app) =>
-          app.musician_id === musicianId
-            ? { ...app, status: "accepted" }
-            : { ...app, status: "rejected" }
-        )
-      );
-    } catch (err) {
-      console.error("Failed to accept musician:", err);
-      alert("Could not accept musician.");
-    }
-  };
-  
+  const token = localStorage.getItem("token");
+  try {
+    await axios.post(
+      `http://localhost:8080/gigs/${id}/accept/${musicianId}`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    alert("Musician accepted!");
+
+    // Update gig status locally to reflect change in UI
+    setGig((prev) => prev ? { ...prev, status: "Covered" } : prev);
+
+    // Optionally, update application status locally
+    setApplications((prev) =>
+      prev.map((app) =>
+        app.musician_id === musicianId
+          ? { ...app, status: "accepted" }
+          : { ...app, status: "rejected" }
+      )
+    );
+  } catch (err) {
+    console.error("Failed to accept musician:", err);
+    alert("Could not accept musician.");
+  }
+};
+
   return (
     <Layout>
       <Box maxWidth="700px" mx="auto" mt={5}>
@@ -241,4 +241,4 @@ const GigDetailPage: React.FC = () => {
   );
 };
 
-export default GigDetailPage;
+export default GigDetailsPage;
