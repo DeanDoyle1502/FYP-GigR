@@ -36,7 +36,7 @@ const GigDetailsPage: React.FC = () => {
       return;
     }
 
-    const fetchGig = axios.get(`http://localhost:8080/gigs/${id}`, {
+    const fetchGig = axios.get(`http://localhost:8080/gigs/details/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -60,7 +60,7 @@ const GigDetailsPage: React.FC = () => {
         setIsOwner(owner);
 
         if (owner) {
-          const appsRes = await axios.get(`http://localhost:8080/gigs/${gigData.id}/applications`, {
+          const appsRes = await axios.get(`http://localhost:8080/gigs/details/${gigData.id}/applications`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
@@ -83,7 +83,7 @@ const GigDetailsPage: React.FC = () => {
           setApplications(appsWithProfiles);
         } else {
           // Check if user already applied
-          const applied = await axios.get(`http://localhost:8080/gigs/${gigData.id}/applications`, {
+          const applied = await axios.get(`http://localhost:8080/gigs/details/${gigData.id}/applications`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           const has = applied.data.some((app: Application) => app.musician_id === userData.id);
@@ -101,7 +101,7 @@ const GigDetailsPage: React.FC = () => {
 
     const token = localStorage.getItem("token");
     try {
-      await axios.delete(`http://localhost:8080/gigs/${id}`, {
+      await axios.delete(`http://localhost:8080/gigs/details/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Gig deleted.");
@@ -184,7 +184,7 @@ const GigDetailsPage: React.FC = () => {
                   <Button onClick={handleDelete} style={{ backgroundColor: "#dc3545" }}>
                     Delete Gig
                   </Button>
-                  <Button onClick={() => navigate(`/gigs/${id}/edit`)} style={{ backgroundColor: "#ffc107", color: "#000" }}>
+                  <Button onClick={() => navigate(`/gigs/details/${id}/edit`)} style={{ backgroundColor: "#ffc107", color: "#000" }}>
                     Edit Gig
                   </Button>
                 </>

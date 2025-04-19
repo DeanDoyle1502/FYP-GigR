@@ -52,3 +52,37 @@ func (h *MessageHandler) SendMessage(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Sent"})
 }
+
+func (h *MessageHandler) GetMessageThread(c *gin.Context) {
+	gigID, err := strconv.Atoi(c.Param("gigID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid gig ID"})
+		return
+	}
+
+	otherUserID, err := strconv.Atoi(c.Param("otherUserID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	senderID, ok := c.Get("userID")
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found in context"})
+		return
+	}
+
+	senderIDInt, ok := senderID.(int)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+
+	messages, err := h.service.GetMessageThread(gigID, senderIDInt, otherUserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, messages)
+}

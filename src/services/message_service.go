@@ -43,3 +43,7 @@ func normalizeUserIDs(a, b int) (int, int) {
 	}
 	return b, a
 }
+
+func (s *MessageService) GetMessageThread(gigID, userA, userB int) ([]models.Message, error) {
+	return s.repo.GetMessages(context.TODO(), gigID, userA, userB)
+}

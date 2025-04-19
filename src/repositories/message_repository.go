@@ -5,8 +5,10 @@ import (
 	"fmt"
 
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/models"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
 type MessageRepository struct {
@@ -32,4 +34,39 @@ func (r *MessageRepository) SaveMessage(ctx context.Context, msg *models.Message
 	}
 
 	return nil
+}
+
+func (r *MessageRepository) GetMessages(
+	ctx context.Context,
+	gigID, userA, userB int,
+) ([]models.Message, error) {
+
+	u1, u2 := normalizeUserIDs(userA, userB)
+	pk := fmt.Sprintf("GIG#%d#USER#%d#USER#%d", gigID, u1, u2)
+
+	out, err := r.dynamo.Query(ctx, &dynamodb.QueryInput{
+		TableName:              aws.String("GigMessages"),
+		KeyConditionExpression: aws.String("PK = :pk"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":pk": &types.AttributeValueMemberS{Value: pk},
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to query messages: %w", err)
+	}
+
+	var messages []models.Message
+	err = attributevalue.UnmarshalListOfMaps(out.Items, &messages)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal messages: %w", err)
+	}
+
+	return messages, nil
+}
+
+func normalizeUserIDs(a, b int) (int, int) {
+	if a < b {
+		return a, b
+	}
+	return b, a
 }

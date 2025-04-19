@@ -38,7 +38,7 @@ const EditGigPage: React.FC = () => {
     }
 
     axios
-      .get(`http://localhost:8080/gigs/${id}`, {
+      .get(`http://localhost:8080/gigs/details/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -65,12 +65,12 @@ const EditGigPage: React.FC = () => {
 
     try {
       await axios.put(
-        `http://localhost:8080/gigs/${id}`,
+        `http://localhost:8080/gigs/details/${id}`,
         { ...gig, date: formattedDate },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert("Gig updated successfully!");
-      navigate(`/gigs/${id}`);
+      navigate(`/gigs/details/${id}`);
     } catch (err: any) {
       console.error("Error updating gig:", err);
       setError("Failed to update gig.");

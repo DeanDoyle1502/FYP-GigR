@@ -49,7 +49,7 @@ const MyApplicationsPage: React.FC = () => {
   <Paper
     key={app.id}
     sx={{ p: 2, mb: 2, cursor: 'pointer', '&:hover': { backgroundColor: '#f5f5f5' } }}
-    onClick={() => navigate(`/gigs/${app.gig.id}`)}
+    onClick={() => navigate(`/gigs/details/${app.gig.id}`)}
   >
     <Typography><strong>Gig:</strong> {app.gig.title}</Typography>
     <Typography><strong>Location:</strong> {app.gig.location}</Typography>
@@ -57,7 +57,7 @@ const MyApplicationsPage: React.FC = () => {
     <Typography><strong>Application Status:</strong> {app.status}</Typography>
     <Typography><strong>Gig Status:</strong> {app.gig.status}</Typography>
     <Button
-              onClick={() => navigate(`/gigs/${app.gig.id}`)}
+              onClick={() => navigate(`/gigs/details/${app.gig.id}`)}
               sx={{ mt: 1 }}
               variant="outlined"
             >

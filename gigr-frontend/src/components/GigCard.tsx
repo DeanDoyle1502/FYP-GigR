@@ -7,7 +7,7 @@ const GigCard = ({ gig, disableNavigation = false }: { gig: Gig; disableNavigati
 
   const handleClick = () => {
     if (!disableNavigation) {
-      navigate(`/gigs/${gig.id}`);
+      navigate(`/gigs/details/${gig.id}`);
     }
   };
 

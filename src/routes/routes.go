@@ -38,14 +38,15 @@ func SetupRouter(
 
 		gigs.GET("/applications/mine", gigHandler.GetMyApplications)
 		gigs.POST("/:gigID/apply", gigHandler.ApplyForGig)
-		gigs.GET("/:id/applications", gigHandler.GetApplicationsForGig)
+		gigs.GET("/details/:id/applications", gigHandler.GetApplicationsForGig)
 		gigs.POST("/:gigID/accept/:musicianID", gigHandler.AcceptMusicianForGig)
 
 		gigs.POST("/:gigID/messages", messageHandler.SendMessage)
+		gigs.GET("/:gigID/thread/:otherUserID", messageHandler.GetMessageThread)
 
-		gigs.GET("/:id", gigHandler.GetGig)
-		gigs.PUT("/:id", gigHandler.UpdateGig)
-		gigs.DELETE("/:id", gigHandler.DeleteGig)
+		gigs.GET("/details/:id", gigHandler.GetGig)
+		gigs.PUT("/details/:id", gigHandler.UpdateGig)
+		gigs.DELETE("/details/:id", gigHandler.DeleteGig)
 
 	}
 

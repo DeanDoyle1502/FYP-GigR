@@ -25,8 +25,8 @@ function App() {
         <Route path="/gigs/create" element={<CreateGigPage />} />
         <Route path="/gigs/mine" element={<MyGigsPage />} />
         <Route path="/gigs/applications/mine" element={<MyApplicationsPage />} />
-        <Route path="/gigs/:id" element={<GigDetailsPage />} />
-        <Route path="/gigs/:id/edit" element={<EditGigPage />} />
+        <Route path="/gigs/details/:id" element={<GigDetailsPage />} />
+        <Route path="/gigs/details/:id/edit" element={<EditGigPage />} />
         <Route path="/gigs/public" element={<PublicGigsPage />} />
         <Route path="/users/:id" element={<UserProfilePage />} />
       </Routes>
