@@ -24,6 +24,9 @@ func main() {
 	log.Println("Setting up Database")
 	db := config.InitDB()
 
+	log.Println("Setting up DynamoDB")
+	dynamoClient := config.InitDynamoDB()
+
 	userRepo := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
@@ -36,7 +39,11 @@ func main() {
 	gigService := services.NewGigService(gigRepo, authService)
 	gigHandler := handlers.NewGigHandler(gigService)
 
-	r := routes.SetupRouter(userHandler, gigHandler, authHandler)
+	messageRepo := repositories.NewMessageRepository(dynamoClient)
+	messageService := services.NewMessageService(messageRepo)
+	messageHandler := handlers.NewMessageHandler(messageService)
+
+	r := routes.SetupRouter(userHandler, gigHandler, authHandler, messageHandler)
 
 	fmt.Println("🚀 Server started with auth routes")
 

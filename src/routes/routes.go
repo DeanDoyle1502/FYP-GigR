@@ -7,7 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHandler, authHandler *handlers.AuthHandler) *gin.Engine {
+func SetupRouter(
+	userHandler *handlers.UserHandler,
+	gigHandler *handlers.GigHandler,
+	authHandler *handlers.AuthHandler,
+	messageHandler *handlers.MessageHandler) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -36,6 +40,8 @@ func SetupRouter(userHandler *handlers.UserHandler, gigHandler *handlers.GigHand
 		gigs.POST("/:gigID/apply", gigHandler.ApplyForGig)
 		gigs.GET("/:id/applications", gigHandler.GetApplicationsForGig)
 		gigs.POST("/:gigID/accept/:musicianID", gigHandler.AcceptMusicianForGig)
+
+		gigs.POST("/:gigID/messages", messageHandler.SendMessage)
 
 		gigs.GET("/:id", gigHandler.GetGig)
 		gigs.PUT("/:id", gigHandler.UpdateGig)
