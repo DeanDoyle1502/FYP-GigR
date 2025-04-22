@@ -8,44 +8,52 @@ import (
 
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/config"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/handlers"
-	"github.com/DeanDoyle1502/FYP-GigR.git/src/middleware"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/repositories"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/routes"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/services"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	// Load environment variables
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using system environment variables")
 	}
-	middleware.SetupJWKs()
 
+	// ✅ Initialize Cognito JWKs for token verification
+	if err := services.SetupJWKs(); err != nil {
+		log.Fatalf("Failed to set up Cognito JWKs: %v", err)
+	}
+	log.Println("✅ Cognito JWKs loaded")
+
+	// Database setup
 	log.Println("Setting up Database")
 	db := config.InitDB()
 
 	log.Println("Setting up DynamoDB")
 	dynamoClient := config.InitDynamoDB()
+	config.EnsureDynamoTableExists()
 
+	// Repositories
 	userRepo := repositories.NewUserRepository(db)
-	userService := services.NewUserService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
+	gigRepo := repositories.NewGigRepository(db)
+	messageRepo := repositories.NewMessageRepository(dynamoClient)
 
+	// Services
+	userService := services.NewUserService(userRepo)
 	cognitoClient := config.InitCognitoClient()
 	authService := services.NewAuthService(cognitoClient, userRepo)
-	authHandler := handlers.NewAuthHandler(authService)
-
-	gigRepo := repositories.NewGigRepository(db)
 	gigService := services.NewGigService(gigRepo, authService)
-	gigHandler := handlers.NewGigHandler(gigService)
-
-	messageRepo := repositories.NewMessageRepository(dynamoClient)
 	messageService := services.NewMessageService(messageRepo)
+
+	// Handlers
+	userHandler := handlers.NewUserHandler(userService)
+	authHandler := handlers.NewAuthHandler(authService)
+	gigHandler := handlers.NewGigHandler(gigService)
 	messageHandler := handlers.NewMessageHandler(messageService)
 
-	r := routes.SetupRouter(userHandler, gigHandler, authHandler, messageHandler)
+	// Routes
+	r := routes.SetupRouter(userHandler, gigHandler, authHandler, messageHandler, userRepo)
 
 	fmt.Println("🚀 Server started with auth routes")
-
 	r.Run("0.0.0.0:8080") // Start server on port 8080
 }

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/repositories"
 	"github.com/MicahParks/keyfunc"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -33,7 +34,7 @@ func SetupJWKs() {
 }
 
 // Middleware to verify JWT and attach Cognito sub to context
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(userRepo *repositories.UserRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fmt.Println("🔐 AuthMiddleware triggered")
 

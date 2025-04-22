@@ -28,14 +28,14 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 }
 
 // Get User by ID
-func (h *UserHandler) GetUser(c *gin.Context) {
+func (h *UserHandler) GetUserByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
-	user, err := h.Service.GetUser(uint(id))
+	user, err := h.Service.GetUserByID(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
@@ -62,19 +62,19 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 // Get the currently logged-in user (via Cognito sub)
 func (h *UserHandler) GetCurrentUser(c *gin.Context) {
-	subValue, exists := c.Get("sub")
+	userIDRaw, exists := c.Get("userID")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: missing Cognito sub"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: user ID missing"})
 		return
 	}
 
-	sub, ok := subValue.(string)
+	userID, ok := userIDRaw.(uint)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid Cognito sub"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
-	user, err := h.Service.GetUserByCognitoSub(sub)
+	user, err := h.Service.GetUser(userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return

@@ -20,8 +20,12 @@ func (s *UserService) GetAllUsers() ([]models.User, error) {
 }
 
 // Fetch user by ID
-func (s *UserService) GetUser(id uint) (*models.User, error) {
+func (s *UserService) GetUserByID(id uint) (*models.User, error) {
 	return s.Repo.GetUserByID(id)
+}
+
+func (s *UserService) GetUser(id uint) (*models.User, error) {
+	return s.Repo.GetUser(id)
 }
 
 // Register new user

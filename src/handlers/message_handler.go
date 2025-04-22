@@ -39,13 +39,13 @@ func (h *MessageHandler) SendMessage(c *gin.Context) {
 		return
 	}
 
-	senderIDInt, ok := senderID.(int)
+	senderIDUint, ok := senderID.(uint)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
 		return
 	}
 
-	if err := h.service.SendMessage(gigID, senderIDInt, body.ReceiverID, body.Content); err != nil {
+	if err := h.service.SendMessage(uint(gigID), senderIDUint, uint(body.ReceiverID), body.Content); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -72,13 +72,13 @@ func (h *MessageHandler) GetMessageThread(c *gin.Context) {
 		return
 	}
 
-	senderIDInt, ok := senderID.(int)
+	senderIDUint, ok := senderID.(uint)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
 		return
 	}
 
-	messages, err := h.service.GetMessageThread(gigID, senderIDInt, otherUserID)
+	messages, err := h.service.GetMessageThread(uint(gigID), senderIDUint, uint(otherUserID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

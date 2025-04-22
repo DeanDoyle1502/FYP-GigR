@@ -26,3 +26,7 @@ func GetUserPoolID() string {
 func GetClientID() string {
 	return os.Getenv("COGNITO_CLIENT_ID")
 }
+
+func GetRegion() string {
+	return os.Getenv("AWS_REGION")
+}

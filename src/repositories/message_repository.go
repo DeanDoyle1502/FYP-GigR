@@ -45,7 +45,7 @@ func (r *MessageRepository) GetMessages(
 	pk := fmt.Sprintf("GIG#%d#USER#%d#USER#%d", gigID, u1, u2)
 
 	out, err := r.dynamo.Query(ctx, &dynamodb.QueryInput{
-		TableName:              aws.String("GigMessages"),
+		TableName:              aws.String("gigrMessages"),
 		KeyConditionExpression: aws.String("PK = :pk"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":pk": &types.AttributeValueMemberS{Value: pk},

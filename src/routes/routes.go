@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/handlers"
-	"github.com/DeanDoyle1502/FYP-GigR.git/src/middleware"
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/repositories"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -11,7 +11,8 @@ func SetupRouter(
 	userHandler *handlers.UserHandler,
 	gigHandler *handlers.GigHandler,
 	authHandler *handlers.AuthHandler,
-	messageHandler *handlers.MessageHandler) *gin.Engine {
+	messageHandler *handlers.MessageHandler,
+	userRepo *repositories.UserRepository) *gin.Engine {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -24,13 +25,13 @@ func SetupRouter(
 
 	// Define user routes
 	r.GET("/users", userHandler.GetAllUsers)
-	r.GET("/users/:id", userHandler.GetUser)
+	r.GET("/users/:id", userHandler.GetUserByID)
 	r.POST("/users", userHandler.CreateUser)
 	r.DELETE("/users/:id", userHandler.DeleteUser)
 
 	// Define gig routes
 	gigs := r.Group("/gigs")
-	gigs.Use(middleware.AuthMiddleware())
+	gigs.Use(authHandler.Middleware()) // ✅ use handler-based auth middleware
 	{
 		gigs.POST("/", gigHandler.CreateGig)
 		gigs.GET("/", gigHandler.GetAllGigs)
@@ -47,15 +48,14 @@ func SetupRouter(
 		gigs.GET("/details/:id", gigHandler.GetGig)
 		gigs.PUT("/details/:id", gigHandler.UpdateGig)
 		gigs.DELETE("/details/:id", gigHandler.DeleteGig)
-
 	}
 
+	// Public gigs
 	r.GET("/gigs/public", gigHandler.GetPublicGigs)
 
+	// Ping route
 	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
+		c.JSON(200, gin.H{"message": "pong"})
 	})
 
 	// Authorisation
@@ -63,12 +63,14 @@ func SetupRouter(
 	r.POST("/auth/login", authHandler.LoginUser)
 	r.POST("/auth/confirm", authHandler.ConfirmUser)
 
-	// Protected /auth routes (require valid JWT)
+	// Protected auth routes
 	auth := r.Group("/auth")
-	auth.Use(middleware.AuthMiddleware())
+	auth.Use(authHandler.Middleware()) // ✅ same here
 	{
 		auth.GET("/me", userHandler.GetCurrentUser)
 	}
 
 	return r
 }
+
+//
