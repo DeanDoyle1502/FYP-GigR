@@ -1,10 +1,9 @@
-## postgresql docker compose setup
 version: '3.9'
 
 services:
   postgres:
-    # django database for local development
     image: postgres:16-alpine
+    container_name: gigr-postgres
     ports:
       - 5432:5432
     volumes:
@@ -13,3 +12,13 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=gigruser
       - POSTGRES_DB=gigrdb
+
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    container_name: gigr-dynamodb
+    ports:
+      - 8000:8000
+    environment:
+      - ENV=development
+    
+   

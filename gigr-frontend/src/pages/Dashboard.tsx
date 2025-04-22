@@ -29,6 +29,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    
 
     if (!token) {
       setError("You must be logged in.");

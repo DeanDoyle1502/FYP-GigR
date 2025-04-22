@@ -2,7 +2,13 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
+
+	"github.com/MicahParks/keyfunc"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/config"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/models"
@@ -12,6 +18,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
 )
+
+var jwks *keyfunc.JWKS
 
 type AuthService struct {
 	Cognito  *cognitoidentityprovider.Client
@@ -43,7 +51,6 @@ func (s *AuthService) RegisterUser(email, password, name, instrument, location, 
 		return fmt.Errorf("failed to register user in Cognito: %w", err)
 	}
 
-	// ✅ Retrieve Cognito sub
 	adminInput := &cognitoidentityprovider.AdminGetUserInput{
 		UserPoolId: aws.String(config.GetUserPoolID()),
 		Username:   aws.String(email),
@@ -65,7 +72,6 @@ func (s *AuthService) RegisterUser(email, password, name, instrument, location, 
 		return fmt.Errorf("could not find Cognito sub after signup")
 	}
 
-	// ✅ Store full user info
 	user := &models.User{
 		Email:      email,
 		CognitoSub: cognitoSub,
@@ -97,7 +103,6 @@ func (s *AuthService) LoginUser(email, password string) (string, error) {
 		return "", fmt.Errorf("login failed: %w", err)
 	}
 
-	// Return the JWT ID token
 	return *result.AuthenticationResult.IdToken, nil
 }
 
@@ -118,4 +123,71 @@ func (s *AuthService) ConfirmUser(email, code string) error {
 
 func (s *AuthService) GetOrCreateUser(sub, email string) (*models.User, error) {
 	return s.UserRepo.GetOrCreateByCognitoSub(sub, email)
+}
+
+// 🆕 Initialize JWKs on app start
+func SetupJWKs() error {
+	jwksURL := fmt.Sprintf(
+		"https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json",
+		config.GetRegion(),
+		config.GetUserPoolID(),
+	)
+
+	var err error
+	jwks, err = keyfunc.Get(jwksURL, keyfunc.Options{})
+	return err
+}
+
+// 🆕 Extract userID from Authorization header
+func (s *AuthService) ExtractUserIDFromToken(c *gin.Context) (uint, error) {
+	authHeader := c.GetHeader("Authorization")
+	fmt.Println("🧪 Authorization header:", authHeader)
+
+	if authHeader == "" {
+		fmt.Println("❌ Missing Authorization header")
+		return 0, errors.New("missing Authorization header")
+	}
+
+	parts := strings.Split(authHeader, " ")
+	if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+		fmt.Println("❌ Invalid Authorization header format:", parts)
+		return 0, errors.New("invalid Authorization header format")
+	}
+
+	tokenString := parts[1]
+	fmt.Println("🔐 Token string:", tokenString)
+
+	token, err := jwt.Parse(tokenString, jwks.Keyfunc)
+	if err != nil {
+		fmt.Println("❌ JWT parse failed:", err)
+		return 0, errors.New("invalid token")
+	}
+	if !token.Valid {
+		fmt.Println("❌ Token is not valid")
+		return 0, errors.New("invalid token")
+	}
+	fmt.Println("✅ Token parsed successfully")
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		fmt.Println("❌ Unable to parse claims")
+		return 0, errors.New("invalid claims")
+	}
+	fmt.Printf("🧾 Claims: %+v\n", claims)
+
+	sub, ok := claims["sub"].(string)
+	if !ok || sub == "" {
+		fmt.Println("❌ Missing sub in claims")
+		return 0, errors.New("missing sub claim")
+	}
+	fmt.Println("✅ Extracted sub:", sub)
+
+	user, err := s.UserRepo.GetUserByCognitoSub(sub)
+	if err != nil {
+		fmt.Println("❌ Failed to get user from DB by sub:", err)
+		return 0, errors.New("user not found")
+	}
+
+	fmt.Println("✅ Found user:", user.ID)
+	return user.ID, nil
 }

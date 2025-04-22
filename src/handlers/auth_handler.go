@@ -15,9 +15,9 @@ func NewAuthHandler(service *services.AuthService) *AuthHandler {
 	return &AuthHandler{Service: service}
 }
 
-// POST /auth/register
+// ✅ User registration
 func (h *AuthHandler) RegisterUser(c *gin.Context) {
-	var req struct {
+	var body struct {
 		Email      string `json:"email"`
 		Password   string `json:"password"`
 		Name       string `json:"name"`
@@ -26,33 +26,33 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 		Bio        string `json:"bio"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	err := h.Service.RegisterUser(req.Email, req.Password, req.Name, req.Instrument, req.Location, req.Bio)
+	err := h.Service.RegisterUser(body.Email, body.Password, body.Name, body.Instrument, body.Location, body.Bio)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
 }
 
-// POST /auth/login
+// ✅ User login
 func (h *AuthHandler) LoginUser(c *gin.Context) {
-	var req struct {
+	var body struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	token, err := h.Service.LoginUser(req.Email, req.Password)
+	token, err := h.Service.LoginUser(body.Email, body.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -61,48 +61,37 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
-// POST /auth/confirm
+// ✅ Confirm user registration
 func (h *AuthHandler) ConfirmUser(c *gin.Context) {
-	var req struct {
+	var body struct {
 		Email string `json:"email"`
 		Code  string `json:"code"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	if err := h.Service.ConfirmUser(req.Email, req.Code); err != nil {
+	err := h.Service.ConfirmUser(body.Email, body.Code)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User confirmed successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Account confirmed"})
 }
 
-// GET /auth/me
-func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
-	claims, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
+// ✅ Middleware to attach user ID from JWT to Gin context
+func (h *AuthHandler) Middleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := h.Service.ExtractUserIDFromToken(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			c.Abort()
+			return
+		}
+		c.Set("userID", userID)
+		c.Next()
 	}
-
-	jwtClaims := claims.(map[string]interface{})
-
-	sub, okSub := jwtClaims["sub"].(string)
-	email, okEmail := jwtClaims["email"].(string)
-	if !okSub || !okEmail {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
-		return
-	}
-
-	user, err := h.Service.GetOrCreateUser(sub, email)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch user"})
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
 }
