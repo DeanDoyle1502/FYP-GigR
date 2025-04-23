@@ -37,7 +37,7 @@ func main() {
 	userRepo := repositories.NewUserRepository(db)
 	gigRepo := repositories.NewGigRepository(db)
 	messageRepo := repositories.NewMessageRepository(dynamoClient)
-	chatSessionRepo := repositories.NewChatSessionRepository(dynamoClient, "gigChatSessions")
+	chatSessionRepo := repositories.NewChatSessionRepository(dynamoClient, "gigrChatSessions")
 
 	// Services
 	userService := services.NewUserService(userRepo)

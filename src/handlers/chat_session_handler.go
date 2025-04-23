@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -41,6 +42,8 @@ func (h *ChatSessionHandler) GetOrCreateSession(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
 		return
 	}
+
+	fmt.Println("🟡 GetOrCreateSession triggered: gigID=%d, userID=%d, otherUserID=%d", gigID, userID, otherUserID)
 
 	session, err := h.service.GetOrCreateSession(gigID, int(userID), otherUserID)
 	if err != nil {

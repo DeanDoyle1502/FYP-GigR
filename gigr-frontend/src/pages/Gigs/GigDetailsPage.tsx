@@ -5,6 +5,7 @@ import Layout from "../../components/Layout";
 import Button from "../../components/Button";
 import { Box, Typography, Paper, Stack } from "@mui/material";
 import { Gig } from "../../types/gig";
+import ChatView from "../../components/ChatView"; 
 
 interface User {
   id: number;
@@ -28,6 +29,7 @@ const GigDetailsPage: React.FC = () => {
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [hasApplied, setHasApplied] = useState<boolean>(false);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [selectedChatUserId, setSelectedChatUserId] = useState<number | null>(null); // 💬 chat state
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -82,7 +84,6 @@ const GigDetailsPage: React.FC = () => {
 
           setApplications(appsWithProfiles);
         } else {
-          // Check if user already applied
           const applied = await axios.get(`http://localhost:8080/gigs/details/${gigData.id}/applications`, {
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -129,31 +130,32 @@ const GigDetailsPage: React.FC = () => {
   };
 
   const handleAccept = async (musicianId: number) => {
-  const token = localStorage.getItem("token");
-  try {
-    await axios.post(
-      `http://localhost:8080/gigs/${id}/accept/${musicianId}`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    alert("Musician accepted!");
+    const token = localStorage.getItem("token");
+    try {
+      await axios.post(
+        `http://localhost:8080/gigs/${id}/accept/${musicianId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Musician accepted!");
 
-    // Update gig status locally to reflect change in UI
-    setGig((prev) => prev ? { ...prev, status: "Covered" } : prev);
+      setGig((prev) => prev ? { ...prev, status: "Covered" } : prev);
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.musician_id === musicianId
+            ? { ...app, status: "accepted" }
+            : { ...app, status: "rejected" }
+        )
+      );
+    } catch (err) {
+      console.error("Failed to accept musician:", err);
+      alert("Could not accept musician.");
+    }
+  };
 
-    // Optionally, update application status locally
-    setApplications((prev) =>
-      prev.map((app) =>
-        app.musician_id === musicianId
-          ? { ...app, status: "accepted" }
-          : { ...app, status: "rejected" }
-      )
-    );
-  } catch (err) {
-    console.error("Failed to accept musician:", err);
-    alert("Could not accept musician.");
-  }
-};
+  const handleOpenChat = (musicianId: number) => {
+    setSelectedChatUserId((prev) => (prev === musicianId ? null : musicianId));
+  };
 
   return (
     <Layout>
@@ -229,7 +231,18 @@ const GigDetailsPage: React.FC = () => {
                       >
                         View Profile
                       </Button>
+                      <Button
+                        onClick={() => handleOpenChat(app.musician_id)}
+                        style={{ backgroundColor: "#0d6efd", color: "#fff" }}
+                      >
+                        💬 Chat
+                      </Button>
                     </Stack>
+                    {selectedChatUserId === app.musician_id && (
+                      <Box mt={2}>
+                        <ChatView gigID={gig.id} otherUserID={app.musician_id} />
+                      </Box>
+                    )}
                   </Paper>
                 ))}
               </Box>

@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/models"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -44,14 +45,33 @@ func (r *ChatSessionRepository) GetSession(ctx context.Context, gigID, userA, us
 }
 
 func (r *ChatSessionRepository) SaveSession(ctx context.Context, session *models.ChatSession) error {
-	item, err := attributevalue.MarshalMap(session)
+	// Clone the struct without the TableName field
+	input := models.ChatSession{
+		ID:          session.ID,
+		GigID:       session.GigID,
+		UserA:       session.UserA,
+		UserB:       session.UserB,
+		CompletedBy: session.CompletedBy,
+		IsArchived:  session.IsArchived,
+		CreatedAt:   session.CreatedAt,
+	}
+
+	item, err := attributevalue.MarshalMap(input)
 	if err != nil {
+		log.Printf("❌ Failed to marshal chat session: %v", err)
 		return fmt.Errorf("failed to marshal chat session: %w", err)
 	}
+
+	log.Printf("📤 Saving chat session item to DynamoDB: %+v", item)
 
 	_, err = r.dynamo.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String(r.table),
 		Item:      item,
 	})
-	return err
+	if err != nil {
+		log.Printf("❌ Failed to put item in DynamoDB: %v", err)
+		return fmt.Errorf("failed to put item in DynamoDB: %w", err)
+	}
+
+	return nil
 }
