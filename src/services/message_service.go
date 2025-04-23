@@ -7,6 +7,7 @@ import (
 
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/models"
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/repositories"
+	"github.com/DeanDoyle1502/FYP-GigR.git/src/utils"
 )
 
 type MessageService struct {
@@ -18,7 +19,7 @@ func NewMessageService(repo *repositories.MessageRepository) *MessageService {
 }
 
 func (s *MessageService) SendMessage(gigID, senderID, receiverID uint, content string) error {
-	u1, u2 := normalizeUserIDs(senderID, receiverID)
+	u1, u2 := utils.NormalizeUserIDs(int(senderID), int(receiverID))
 	pk := fmt.Sprintf("GIG#%d#USER#%d#USER#%d", gigID, u1, u2)
 	sk := fmt.Sprintf("MSG#%s", time.Now().UTC().Format(time.RFC3339))
 
@@ -34,13 +35,6 @@ func (s *MessageService) SendMessage(gigID, senderID, receiverID uint, content s
 	}
 
 	return s.repo.SaveMessage(context.TODO(), msg)
-}
-
-func normalizeUserIDs(a, b uint) (uint, uint) {
-	if a < b {
-		return a, b
-	}
-	return b, a
 }
 
 func (s *MessageService) GetMessageThread(gigID, userA, userB uint) ([]models.Message, error) {
