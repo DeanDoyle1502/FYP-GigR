@@ -45,7 +45,7 @@ func main() {
 	authService := services.NewAuthService(cognitoClient, userRepo)
 	gigService := services.NewGigService(gigRepo, authService)
 	messageService := services.NewMessageService(messageRepo)
-	chatSessionService := services.NewChatSessionService(chatSessionRepo)
+	chatSessionService := services.NewChatSessionService(chatSessionRepo, gigRepo)
 
 	// Handlers
 	userHandler := handlers.NewUserHandler(userService)

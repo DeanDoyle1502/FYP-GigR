@@ -5,7 +5,7 @@ import Layout from "../../components/Layout";
 import Button from "../../components/Button";
 import { Box, Typography, Paper, Stack } from "@mui/material";
 import { Gig } from "../../types/gig";
-import ChatView from "../../components/ChatView"; 
+import ChatView from "../../components/ChatView";
 
 interface User {
   id: number;
@@ -29,7 +29,8 @@ const GigDetailsPage: React.FC = () => {
   const [isOwner, setIsOwner] = useState<boolean>(false);
   const [hasApplied, setHasApplied] = useState<boolean>(false);
   const [applications, setApplications] = useState<Application[]>([]);
-  const [selectedChatUserId, setSelectedChatUserId] = useState<number | null>(null); // 💬 chat state
+  const [selectedChatUserId, setSelectedChatUserId] = useState<number | null>(null);
+  const [chatExists, setChatExists] = useState<boolean>(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -55,7 +56,6 @@ const GigDetailsPage: React.FC = () => {
         };
 
         const gigData = gigRes.data;
-
         setUser(userData);
         setGig(gigData);
         const owner = userData.id === gigData.user?.id;
@@ -87,8 +87,24 @@ const GigDetailsPage: React.FC = () => {
           const applied = await axios.get(`http://localhost:8080/gigs/details/${gigData.id}/applications`, {
             headers: { Authorization: `Bearer ${token}` },
           });
+
           const has = applied.data.some((app: Application) => app.musician_id === userData.id);
           setHasApplied(has);
+
+          // ✅ Check if poster has sent any messages
+          if (has && gigData.user?.id) {
+            try {
+              const threadRes = await axios.get(`http://localhost:8080/gigs/${gigData.id}/thread/${gigData.user.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+
+              if (threadRes.data && threadRes.data.length > 0) {
+                setChatExists(true);
+              }
+            } catch (err) {
+              console.log("No messages from poster yet.");
+            }
+          }
         }
       })
       .catch((err) => {
@@ -138,7 +154,6 @@ const GigDetailsPage: React.FC = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert("Musician accepted!");
-
       setGig((prev) => prev ? { ...prev, status: "Covered" } : prev);
       setApplications((prev) =>
         prev.map((app) =>
@@ -165,9 +180,7 @@ const GigDetailsPage: React.FC = () => {
           <Typography>Loading gig...</Typography>
         ) : (
           <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
-            <Typography variant="h4" gutterBottom>
-              {gig.title}
-            </Typography>
+            <Typography variant="h4" gutterBottom>{gig.title}</Typography>
             <Typography><strong>Date:</strong> {new Date(gig.date).toLocaleString()}</Typography>
             <Typography><strong>Location:</strong> {gig.location}</Typography>
             <Typography><strong>Instrument:</strong> {gig.instrument}</Typography>
@@ -183,20 +196,13 @@ const GigDetailsPage: React.FC = () => {
 
               {isOwner && (
                 <>
-                  <Button onClick={handleDelete} style={{ backgroundColor: "#dc3545" }}>
-                    Delete Gig
-                  </Button>
-                  <Button onClick={() => navigate(`/gigs/details/${id}/edit`)} style={{ backgroundColor: "#ffc107", color: "#000" }}>
-                    Edit Gig
-                  </Button>
+                  <Button onClick={handleDelete} style={{ backgroundColor: "#dc3545" }}>Delete Gig</Button>
+                  <Button onClick={() => navigate(`/gigs/details/${id}/edit`)} style={{ backgroundColor: "#ffc107", color: "#000" }}>Edit Gig</Button>
                 </>
               )}
 
               {!isOwner && gig.status === "Available" && !hasApplied && (
-                <Button
-                  onClick={handleApply}
-                  style={{ backgroundColor: "#28a745", color: "#fff" }}
-                >
+                <Button onClick={handleApply} style={{ backgroundColor: "#28a745", color: "#fff" }}>
                   Apply for Gig
                 </Button>
               )}
@@ -208,35 +214,24 @@ const GigDetailsPage: React.FC = () => {
               )}
             </Box>
 
+            {!isOwner && hasApplied && chatExists && gig?.user?.id && (
+              <Box mt={4}>
+                <ChatView gigID={gig.id} otherUserID={gig.user.id} />
+              </Box>
+            )}
+
             {isOwner && applications.length > 0 && (
               <Box mt={5}>
-                <Typography variant="h6" gutterBottom>
-                  Applications
-                </Typography>
+                <Typography variant="h6" gutterBottom>Applications</Typography>
                 {applications.map((app) => (
                   <Paper key={app.id} sx={{ p: 2, mb: 2, backgroundColor: "#f9f9f9" }}>
                     <Typography><strong>Name:</strong> {app.musician?.name}</Typography>
                     <Typography><strong>Email:</strong> {app.musician?.email}</Typography>
                     <Typography><strong>Status:</strong> {app.status}</Typography>
                     <Stack direction="row" spacing={2} mt={1}>
-                      <Button
-                        onClick={() => handleAccept(app.musician_id)}
-                        style={{ backgroundColor: "#28a745" }}
-                      >
-                        Accept
-                      </Button>
-                      <Button
-                        onClick={() => navigate(`/users/${app.musician_id}`)}
-                        style={{ backgroundColor: "#6c757d" }}
-                      >
-                        View Profile
-                      </Button>
-                      <Button
-                        onClick={() => handleOpenChat(app.musician_id)}
-                        style={{ backgroundColor: "#0d6efd", color: "#fff" }}
-                      >
-                        💬 Chat
-                      </Button>
+                      <Button onClick={() => handleAccept(app.musician_id)} style={{ backgroundColor: "#28a745" }}>Accept</Button>
+                      <Button onClick={() => navigate(`/users/${app.musician_id}`)} style={{ backgroundColor: "#6c757d" }}>View Profile</Button>
+                      <Button onClick={() => handleOpenChat(app.musician_id)} style={{ backgroundColor: "#0d6efd", color: "#fff" }}>💬 Chat</Button>
                     </Stack>
                     {selectedChatUserId === app.musician_id && (
                       <Box mt={2}>

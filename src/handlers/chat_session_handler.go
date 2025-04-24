@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -17,7 +16,7 @@ func NewChatSessionHandler(service *services.ChatSessionService) *ChatSessionHan
 	return &ChatSessionHandler{service: service}
 }
 
-// GET /chats/session/:gigID/:otherUserID
+// GET /gigs/:gigID/session/:otherUserID
 func (h *ChatSessionHandler) GetOrCreateSession(c *gin.Context) {
 	gigID, err := strconv.Atoi(c.Param("gigID"))
 	if err != nil {
@@ -43,18 +42,36 @@ func (h *ChatSessionHandler) GetOrCreateSession(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("🟡 GetOrCreateSession triggered: gigID=%d, userID=%d, otherUserID=%d", gigID, userID, otherUserID)
+	// Always try to fetch the session first
+	session, err := h.service.GetSessionOnly(gigID, int(userID), otherUserID)
+	if err == nil && session != nil {
+		c.JSON(http.StatusOK, session)
+		return
+	}
 
-	session, err := h.service.GetOrCreateSession(gigID, int(userID), otherUserID)
+	// If no session, only the gig poster can create it
+	isPoster, posterErr := h.service.IsGigPoster(int(userID), gigID)
+	if posterErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to verify user role"})
+		return
+	}
+
+	if !isPoster {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Chat session not started yet by poster"})
+		return
+	}
+
+	// Poster creates the session
+	session, err = h.service.CreateSession(gigID, int(userID), otherUserID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create chat session"})
 		return
 	}
 
 	c.JSON(http.StatusOK, session)
 }
 
-// PATCH /chats/session/:gigID/:otherUserID/complete
+// PATCH /gigs/:gigID/session/:otherUserID/complete
 func (h *ChatSessionHandler) MarkComplete(c *gin.Context) {
 	gigID, err := strconv.Atoi(c.Param("gigID"))
 	if err != nil {

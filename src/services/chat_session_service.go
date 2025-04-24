@@ -13,24 +13,23 @@ import (
 )
 
 type ChatSessionService struct {
-	repo *repositories.ChatSessionRepository
+	repo    *repositories.ChatSessionRepository
+	gigRepo *repositories.GigRepository
 }
 
-func NewChatSessionService(repo *repositories.ChatSessionRepository) *ChatSessionService {
-	return &ChatSessionService{repo: repo}
+func NewChatSessionService(repo *repositories.ChatSessionRepository, gigRepo *repositories.GigRepository) *ChatSessionService {
+	return &ChatSessionService{repo: repo, gigRepo: gigRepo}
 }
 
-func (s *ChatSessionService) GetOrCreateSession(gigID, userA, userB int) (*models.ChatSession, error) {
+// GetSessionOnly tries to fetch an existing chat session between two users for a gig.
+func (s *ChatSessionService) GetSessionOnly(gigID, userA, userB int) (*models.ChatSession, error) {
 	u1, u2 := utils.NormalizeUserIDs(userA, userB)
+	return s.repo.GetSession(context.TODO(), gigID, u1, u2)
+}
 
-	log.Printf("➡️ [Service] GetOrCreateSession gigID=%d, u1=%d, u2=%d", gigID, u1, u2)
-
-	session, err := s.repo.GetSession(context.TODO(), gigID, u1, u2)
-	if session != nil && err == nil {
-		log.Println("✅ [Service] Session already exists")
-		return session, nil
-	}
-
+// CreateSession creates a new chat session between the two users for a gig.
+func (s *ChatSessionService) CreateSession(gigID, userA, userB int) (*models.ChatSession, error) {
+	u1, u2 := utils.NormalizeUserIDs(userA, userB)
 	now := time.Now().UTC().Format(time.RFC3339)
 	id := fmt.Sprintf("GIG#%d#USER#%d#USER#%d", gigID, u1, u2)
 
@@ -50,7 +49,7 @@ func (s *ChatSessionService) GetOrCreateSession(gigID, userA, userB int) (*model
 
 	log.Printf("📄 [Service] Creating new session: %+v", newSession)
 
-	err = s.repo.SaveSession(context.TODO(), newSession)
+	err := s.repo.SaveSession(context.TODO(), newSession)
 	if err != nil {
 		log.Printf("❌ [Service] Failed to save session: %v", err)
 		return nil, err
@@ -59,6 +58,8 @@ func (s *ChatSessionService) GetOrCreateSession(gigID, userA, userB int) (*model
 	return newSession, nil
 }
 
+// MarkComplete updates the chat session to mark the given user as complete.
+// When both users complete, it archives the session.
 func (s *ChatSessionService) MarkComplete(gigID int, userID, otherUserID int) error {
 	u1, u2 := utils.NormalizeUserIDs(userID, otherUserID)
 	key := strconv.Itoa(userID)
@@ -76,4 +77,12 @@ func (s *ChatSessionService) MarkComplete(gigID int, userID, otherUserID int) er
 	}
 
 	return s.repo.SaveSession(context.TODO(), session)
+}
+
+func (s *ChatSessionService) IsGigPoster(userID, gigID int) (bool, error) {
+	gig, err := s.gigRepo.GetGigByID(uint(gigID))
+	if err != nil {
+		return false, err
+	}
+	return gig.UserID == uint(userID), nil
 }
