@@ -12,6 +12,7 @@ func SetupRouter(
 	gigHandler *handlers.GigHandler,
 	authHandler *handlers.AuthHandler,
 	messageHandler *handlers.MessageHandler,
+	chatSessionHandler *handlers.ChatSessionHandler,
 	userRepo *repositories.UserRepository) *gin.Engine {
 	r := gin.Default()
 
@@ -44,6 +45,9 @@ func SetupRouter(
 
 		gigs.POST("/:gigID/messages", messageHandler.SendMessage)
 		gigs.GET("/:gigID/thread/:otherUserID", messageHandler.GetMessageThread)
+
+		gigs.GET("/:gigID/session/:otherUserID", chatSessionHandler.GetOrCreateSession)
+		gigs.PATCH("/:gigID/session/:otherUserID/complete", chatSessionHandler.MarkComplete)
 
 		gigs.GET("/details/:id", gigHandler.GetGig)
 		gigs.PUT("/details/:id", gigHandler.UpdateGig)

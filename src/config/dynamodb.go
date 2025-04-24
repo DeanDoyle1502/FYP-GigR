@@ -49,52 +49,75 @@ func InitDynamoDB() *dynamodb.Client {
 }
 
 // EnsureDynamoTableExists creates the table if it doesn't already exist
-func EnsureDynamoTableExists() {
-	tableName := os.Getenv("DYNAMODB_TABLE_NAME")
+func EnsureDynamoTablesExist() {
+	tables := []string{"gigrMessages", "gigrChatSessions"}
 
-	// Check if table exists
-	_, err := DynamoDBClient.DescribeTable(context.TODO(), &dynamodb.DescribeTableInput{
-		TableName: aws.String(tableName),
-	})
-
-	if err == nil {
-		fmt.Printf("✅ DynamoDB table '%s' already exists\n", tableName)
-		return
-	}
-
-	// Create table
-	_, err = DynamoDBClient.CreateTable(context.TODO(), &dynamodb.CreateTableInput{
-		TableName: aws.String(tableName),
-		AttributeDefinitions: []types.AttributeDefinition{
-			{AttributeName: aws.String("PK"), AttributeType: types.ScalarAttributeTypeS},
-			{AttributeName: aws.String("SK"), AttributeType: types.ScalarAttributeTypeS},
-		},
-		KeySchema: []types.KeySchemaElement{
-			{AttributeName: aws.String("PK"), KeyType: types.KeyTypeHash},
-			{AttributeName: aws.String("SK"), KeyType: types.KeyTypeRange},
-		},
-		BillingMode: types.BillingModePayPerRequest,
-	})
-	if err != nil {
-		panic(fmt.Sprintf("❌ Failed to create DynamoDB table: %v", err))
-	}
-
-	fmt.Printf("🛠️ Created DynamoDB table '%s'\n", tableName)
-
-	// Wait until table is ACTIVE
-	for {
-		out, err := DynamoDBClient.DescribeTable(context.TODO(), &dynamodb.DescribeTableInput{
+	for _, tableName := range tables {
+		// Check if table exists
+		_, err := DynamoDBClient.DescribeTable(context.TODO(), &dynamodb.DescribeTableInput{
 			TableName: aws.String(tableName),
 		})
-		if err != nil {
-			fmt.Println("⏳ Waiting for table to be active:", err)
-			time.Sleep(2 * time.Second)
+
+		if err == nil {
+			fmt.Printf("✅ DynamoDB table '%s' already exists\n", tableName)
 			continue
 		}
-		if out.Table.TableStatus == types.TableStatusActive {
-			fmt.Printf("🚀 Table '%s' is now ACTIVE\n", tableName)
-			break
+
+		// Create table based on name
+		var input *dynamodb.CreateTableInput
+
+		switch tableName {
+		case "gigrMessages":
+			input = &dynamodb.CreateTableInput{
+				TableName: aws.String(tableName),
+				AttributeDefinitions: []types.AttributeDefinition{
+					{AttributeName: aws.String("PK"), AttributeType: types.ScalarAttributeTypeS},
+					{AttributeName: aws.String("SK"), AttributeType: types.ScalarAttributeTypeS},
+				},
+				KeySchema: []types.KeySchemaElement{
+					{AttributeName: aws.String("PK"), KeyType: types.KeyTypeHash},
+					{AttributeName: aws.String("SK"), KeyType: types.KeyTypeRange},
+				},
+				BillingMode: types.BillingModePayPerRequest,
+			}
+		case "gigrChatSessions":
+			input = &dynamodb.CreateTableInput{
+				TableName: aws.String(tableName),
+				AttributeDefinitions: []types.AttributeDefinition{
+					{AttributeName: aws.String("id"), AttributeType: types.ScalarAttributeTypeS},
+				},
+				KeySchema: []types.KeySchemaElement{
+					{AttributeName: aws.String("id"), KeyType: types.KeyTypeHash},
+				},
+				BillingMode: types.BillingModePayPerRequest,
+			}
+		default:
+			fmt.Printf("⚠️ Unknown table name: %s — skipping\n", tableName)
+			continue
 		}
-		time.Sleep(1 * time.Second)
+
+		_, err = DynamoDBClient.CreateTable(context.TODO(), input)
+		if err != nil {
+			panic(fmt.Sprintf("❌ Failed to create DynamoDB table '%s': %v", tableName, err))
+		}
+
+		fmt.Printf("🛠️ Creating DynamoDB table '%s'\n", tableName)
+
+		// Wait for table to become ACTIVE
+		for {
+			out, err := DynamoDBClient.DescribeTable(context.TODO(), &dynamodb.DescribeTableInput{
+				TableName: aws.String(tableName),
+			})
+			if err != nil {
+				fmt.Println("⏳ Waiting for table to be active:", err)
+				time.Sleep(2 * time.Second)
+				continue
+			}
+			if out.Table.TableStatus == types.TableStatusActive {
+				fmt.Printf("🚀 Table '%s' is now ACTIVE\n", tableName)
+				break
+			}
+			time.Sleep(1 * time.Second)
+		}
 	}
 }

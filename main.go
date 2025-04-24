@@ -31,12 +31,13 @@ func main() {
 
 	log.Println("Setting up DynamoDB")
 	dynamoClient := config.InitDynamoDB()
-	config.EnsureDynamoTableExists()
+	config.EnsureDynamoTablesExist()
 
 	// Repositories
 	userRepo := repositories.NewUserRepository(db)
 	gigRepo := repositories.NewGigRepository(db)
 	messageRepo := repositories.NewMessageRepository(dynamoClient)
+	chatSessionRepo := repositories.NewChatSessionRepository(dynamoClient, "gigrChatSessions")
 
 	// Services
 	userService := services.NewUserService(userRepo)
@@ -44,15 +45,17 @@ func main() {
 	authService := services.NewAuthService(cognitoClient, userRepo)
 	gigService := services.NewGigService(gigRepo, authService)
 	messageService := services.NewMessageService(messageRepo)
+	chatSessionService := services.NewChatSessionService(chatSessionRepo, gigRepo)
 
 	// Handlers
 	userHandler := handlers.NewUserHandler(userService)
 	authHandler := handlers.NewAuthHandler(authService)
 	gigHandler := handlers.NewGigHandler(gigService)
 	messageHandler := handlers.NewMessageHandler(messageService)
+	chatSessionHandler := handlers.NewChatSessionHandler(chatSessionService)
 
 	// Routes
-	r := routes.SetupRouter(userHandler, gigHandler, authHandler, messageHandler, userRepo)
+	r := routes.SetupRouter(userHandler, gigHandler, authHandler, messageHandler, chatSessionHandler, userRepo)
 
 	fmt.Println("🚀 Server started with auth routes")
 	r.Run("0.0.0.0:8080") // Start server on port 8080
