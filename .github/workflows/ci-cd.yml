@@ -24,8 +24,8 @@ jobs:
       # Step 3: Build and Push Docker Image
       - name: Build and Push Docker Image
         run: |
-          docker build -t deandoyle/hello-world-go:latest .
-          docker push deandoyle/hello-world-go:latest
+          docker build -t deandoyle/gigr:latest .
+          docker push deandoyle/gigr:latest
 
       # Step 4: Deploy to EC2
       - name: Set up SSH Key
@@ -36,11 +36,16 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} <<EOF
-          docker pull deandoyle/hello-world-go:latest
-          docker stop hello-world-go || true
-          docker rm hello-world-go || true
-          docker run -d -p 8080:8080 -e DB_HOST=${{ secrets.DB_HOST }} -e DB_NAME=${{ secrets.DB_NAME }} -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} -e DB_USER=${{ secrets.DB_USER }} --name hello-world-go deandoyle/hello-world-go:latest
+          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} <<'EOF'
+          docker pull deandoyle/gigr:latest
+          docker stop gigr || true
+          docker rm gigr || true
+          docker run -d -p 80:8080 \
+            -e DB_HOST="${DB_HOST}" \
+            -e DB_NAME="${DB_NAME}" \
+            -e DB_PASSWORD="${DB_PASSWORD}" \
+            -e DB_USER="${DB_USER}" \
+            --name gigr deandoyle/gigr:latest
           EOF
 
       - name: Clean up SSH Key
