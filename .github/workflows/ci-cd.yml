@@ -47,6 +47,7 @@ jobs:
             -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             -e DB_USER="${{ secrets.DB_USER }}" \
             -e AWS_REGION="${{ secrets.AWS_REGION }}" \
+            -e COGNITO_CLIENT_ID="${{ secrets.COGNITO_CLIENT_ID }}" \
             -e COGNITO_USER_POOL_ID="${{ secrets.COGNITO_USER_POOL_ID }}" \
             -e DB_PORT="${{ secrets.DB_PORT }}" \
             -e DB_SSL_MODE="${{ secrets.DB_SSL_MODE }}" \
