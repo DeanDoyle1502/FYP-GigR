@@ -37,7 +37,7 @@ const EditGigPage: React.FC = () => {
       return;
     }
 
-    api.get(`http://localhost:8080/gigs/details/${id}`, {
+    api.get(`/gigs/details/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -64,7 +64,7 @@ const EditGigPage: React.FC = () => {
 
     try {
       await api.put(
-        `http://localhost:8080/gigs/details/${id}`,
+        `/gigs/details/${id}`,
         { ...gig, date: formattedDate },
         { headers: { Authorization: `Bearer ${token}` } }
       );

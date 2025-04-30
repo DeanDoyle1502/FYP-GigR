@@ -28,7 +28,7 @@ const UserProfilePage: React.FC = () => {
     }
 
     api
-      .get(`http://localhost:8080/users/${id}`, {
+      .get(`/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setUser(res.data))

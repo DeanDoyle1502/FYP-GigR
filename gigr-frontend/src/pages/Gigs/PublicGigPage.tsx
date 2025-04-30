@@ -11,7 +11,7 @@ const PublicGigsPage: React.FC = () => {
 
   useEffect(() => {
     api
-      .get("http://localhost:8080/gigs/public")
+      .get("/gigs/public")
       .then((res) => setGigs(res.data))
       .catch((err) => {
         console.error("Failed to fetch public gigs:", err);

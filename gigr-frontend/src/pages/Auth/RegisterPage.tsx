@@ -24,7 +24,7 @@ const RegisterPage: React.FC = () => {
     setError(null);
 
     try {
-      const res = await api.post("http://localhost:8080/auth/register", {
+      const res = await api.post("/auth/register", {
         email,
         password,
         name,

@@ -17,7 +17,7 @@ const MyGigsPage: React.FC = () => {
     }
 
     api
-      .get("http://localhost:8080/gigs/mine", {
+      .get("/gigs/mine", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setGigs(res.data))

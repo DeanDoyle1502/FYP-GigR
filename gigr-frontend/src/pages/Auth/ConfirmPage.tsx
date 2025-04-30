@@ -22,7 +22,7 @@ const ConfirmPage: React.FC = () => {
     setError(null);
 
     try {
-      await api.post("http://localhost:8080/auth/confirm", { email, code });
+      await api.post("/auth/confirm", { email, code });
       setMessage("Account confirmed! You can now log in.");
       setTimeout(() => navigate("/auth/login"), 1500);
     } catch (err: any) {

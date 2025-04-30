@@ -28,7 +28,7 @@ const MyApplicationsPage: React.FC = () => {
     if (!token) return;
 
     api
-      .get("http://localhost:8080/gigs/applications/mine", {
+      .get("/gigs/applications/mine", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setApplications(res.data))

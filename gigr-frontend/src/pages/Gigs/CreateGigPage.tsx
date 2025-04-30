@@ -35,7 +35,7 @@ const CreateGigPage: React.FC = () => {
 
     try {
       await api.post(
-        "http://localhost:8080/gigs/",
+        "/gigs/",
         { title, description, location, date: formattedDate, instrument, status },
         { headers: { Authorization: `Bearer ${token}` } }
       );

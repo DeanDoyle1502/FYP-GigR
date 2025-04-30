@@ -19,7 +19,7 @@ const LoginPage: React.FC = () => {
     setError(null);
 
     try {
-      const res = await api.post("http://localhost:8080/auth/login", {
+      const res = await api.post("/auth/login", {
         email,
         password,
       });
