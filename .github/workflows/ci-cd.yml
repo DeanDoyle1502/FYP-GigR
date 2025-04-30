@@ -48,7 +48,9 @@ jobs:
             -e DB_USER="${{ secrets.DB_USER }}" \
             -e AWS_REGION="${{ secrets.AWS_REGION }}" \
             -e COGNITO_USER_POOL_ID="${{ secrets.COGNITO_USER_POOL_ID }}" \
-            --name gigr deandoyle/gigr:latest
+            -e DB_PORT="${{ secrets.DB_PORT }}" \
+            -e DB_SSL_MODE="${{ secrets.DB_SSL_MODE }}" \
+          --name gigr deandoyle/gigr:latest
           EOF
 
       # Step 6: Clean up SSH Key
