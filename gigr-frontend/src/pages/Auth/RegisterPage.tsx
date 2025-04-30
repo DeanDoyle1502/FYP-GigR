@@ -35,7 +35,7 @@ const RegisterPage: React.FC = () => {
 
       setMessage(res.data.message);
       setTimeout(() => {
-        navigate("/confirm", { state: { email } });
+        navigate("/auth/confirm", { state: { email } });
       }, 2000);
     } catch (err: any) {
       const msg = err.response?.data?.error || "Something went wrong";
