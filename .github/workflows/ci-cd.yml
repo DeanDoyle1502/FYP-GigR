@@ -46,7 +46,7 @@ jobs:
             -e DB_NAME="${{ secrets.DB_NAME }}" \
             -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             -e DB_USER="${{ secrets.DB_USER }}" \
-            -e COGNITO_REGION="${{ secrets.COGNITO_REGION }}" \
+            -e AWS_REGION="${{ secrets.AWS_REGION }}" \
             -e COGNITO_USER_POOL_ID="${{ secrets.COGNITO_USER_POOL_ID }}" \
             --name gigr deandoyle/gigr:latest
           EOF
