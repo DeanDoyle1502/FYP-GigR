@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
 import Layout from "../../components/Layout";
 import Button from "../../components/Button";
 import { Box, Typography, Paper, Stack } from "@mui/material";
@@ -39,11 +39,11 @@ const GigDetailsPage: React.FC = () => {
       return;
     }
 
-    const fetchGig = axios.get(`http://localhost:8080/gigs/details/${id}`, {
+    const fetchGig = api.get(`http://localhost:8080/gigs/details/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    const fetchUser = axios.get(`http://localhost:8080/auth/me`, {
+    const fetchUser = api.get(`http://localhost:8080/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -62,13 +62,13 @@ const GigDetailsPage: React.FC = () => {
         setIsOwner(owner);
 
         if (owner) {
-          const appsRes = await axios.get(`http://localhost:8080/gigs/details/${gigData.id}/applications`, {
+          const appsRes = await api.get(`http://localhost:8080/gigs/details/${gigData.id}/applications`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
           const appsWithProfiles = await Promise.all(
             appsRes.data.map(async (app: Application) => {
-              const userRes = await axios.get(`http://localhost:8080/users/${app.musician_id}`, {
+              const userRes = await api.get(`http://localhost:8080/users/${app.musician_id}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
               return {
@@ -84,7 +84,7 @@ const GigDetailsPage: React.FC = () => {
 
           setApplications(appsWithProfiles);
         } else {
-          const applied = await axios.get(`http://localhost:8080/gigs/details/${gigData.id}/applications`, {
+          const applied = await api.get(`http://localhost:8080/gigs/details/${gigData.id}/applications`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
@@ -94,7 +94,7 @@ const GigDetailsPage: React.FC = () => {
           // ✅ Check if poster has sent any messages
           if (has && gigData.user?.id) {
             try {
-              const threadRes = await axios.get(`http://localhost:8080/gigs/${gigData.id}/thread/${gigData.user.id}`, {
+              const threadRes = await api.get(`http://localhost:8080/gigs/${gigData.id}/thread/${gigData.user.id}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
 
@@ -118,7 +118,7 @@ const GigDetailsPage: React.FC = () => {
 
     const token = localStorage.getItem("token");
     try {
-      await axios.delete(`http://localhost:8080/gigs/details/${id}`, {
+      await api.delete(`http://localhost:8080/gigs/details/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Gig deleted.");
@@ -132,7 +132,7 @@ const GigDetailsPage: React.FC = () => {
   const handleApply = async () => {
     const token = localStorage.getItem("token");
     try {
-      await axios.post(
+      await api.post(
         `http://localhost:8080/gigs/${id}/apply`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
@@ -148,7 +148,7 @@ const GigDetailsPage: React.FC = () => {
   const handleAccept = async (musicianId: number) => {
     const token = localStorage.getItem("token");
     try {
-      await axios.post(
+      await api.post(
         `http://localhost:8080/gigs/${id}/accept/${musicianId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Layout from "../../components/Layout";
 import { Container, Typography, Paper, Box } from "@mui/material";
-import axios from "axios";
+import api from "../../api/axios";
 
 interface UserProfile {
   id: number;
@@ -27,7 +27,7 @@ const UserProfilePage: React.FC = () => {
       return;
     }
 
-    axios
+    api
       .get(`http://localhost:8080/users/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })

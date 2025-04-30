@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import Layout from "../../components/Layout";
 import GigCard from "../../components/GigCard";
 import { Gig } from "../../types/gig";
@@ -16,7 +16,7 @@ const MyGigsPage: React.FC = () => {
       return;
     }
 
-    axios
+    api
       .get("http://localhost:8080/gigs/mine", {
         headers: { Authorization: `Bearer ${token}` },
       })

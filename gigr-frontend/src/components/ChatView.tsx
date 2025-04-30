@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 
 const CURRENT_USER_ID = 5;
 
@@ -36,10 +36,10 @@ const ChatView: React.FC<ChatViewProps> = ({ gigID, otherUserID }) => {
 
     try {
       const [sessionRes, messagesRes] = await Promise.all([
-        axios.get(`http://localhost:8080/gigs/${gigID}/session/${otherUserID}`, {
+        api.get(`http://localhost:8080/gigs/${gigID}/session/${otherUserID}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get(`http://localhost:8080/gigs/${gigID}/thread/${otherUserID}`, {
+        api.get(`http://localhost:8080/gigs/${gigID}/thread/${otherUserID}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -56,7 +56,7 @@ const ChatView: React.FC<ChatViewProps> = ({ gigID, otherUserID }) => {
     const token = localStorage.getItem("token");
 
     try {
-      await axios.post(
+      await api.post(
         `http://localhost:8080/gigs/${gigID}/messages`,
         {
           receiverId: otherUserID,
@@ -77,7 +77,7 @@ const ChatView: React.FC<ChatViewProps> = ({ gigID, otherUserID }) => {
     const token = localStorage.getItem("token");
 
     try {
-      await axios.patch(
+      await api.patch(
         `http://localhost:8080/gigs/${gigID}/session/${otherUserID}/complete`,
         {},
         {

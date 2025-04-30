@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/Layout";
 import FormInput from "../../components/FormInput";
@@ -34,7 +34,7 @@ const CreateGigPage: React.FC = () => {
     const formattedDate = new Date(date).toISOString();
 
     try {
-      await axios.post(
+      await api.post(
         "http://localhost:8080/gigs/",
         { title, description, location, date: formattedDate, instrument, status },
         { headers: { Authorization: `Bearer ${token}` } }

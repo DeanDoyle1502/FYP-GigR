@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import Button from "../components/Button";
@@ -36,7 +36,7 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    axios
+    api
       .get("http://localhost:8080/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       })

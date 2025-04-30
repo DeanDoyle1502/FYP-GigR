@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import Layout from "../../components/Layout";
 import { Box, Typography, Paper, Container, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +27,7 @@ const MyApplicationsPage: React.FC = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    axios
+    api
       .get("http://localhost:8080/gigs/applications/mine", {
         headers: { Authorization: `Bearer ${token}` },
       })

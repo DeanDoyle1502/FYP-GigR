@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import Layout from "../../components/Layout";
 import GigCard from "../../components/GigCard";
 import { Gig } from "../../types/gig";
@@ -10,7 +10,7 @@ const PublicGigsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios
+    api
       .get("http://localhost:8080/gigs/public")
       .then((res) => setGigs(res.data))
       .catch((err) => {

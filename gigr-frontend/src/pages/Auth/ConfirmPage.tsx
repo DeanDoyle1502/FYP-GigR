@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../../components/Layout";
 import FormInput from "../../components/FormInput";
@@ -22,7 +22,7 @@ const ConfirmPage: React.FC = () => {
     setError(null);
 
     try {
-      await axios.post("http://localhost:8080/auth/confirm", { email, code });
+      await api.post("http://localhost:8080/auth/confirm", { email, code });
       setMessage("Account confirmed! You can now log in.");
       setTimeout(() => navigate("/auth/login"), 1500);
     } catch (err: any) {
