@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/joho/godotenv"
 
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/config"
@@ -56,6 +58,16 @@ func main() {
 
 	// Routes
 	r := routes.SetupRouter(userHandler, gigHandler, authHandler, messageHandler, chatSessionHandler, userRepo)
+
+	// CORS setup
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://gigr-frontend.s3-website-eu-west-1.amazonaws.com"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	fmt.Println("🚀 Server started with auth routes")
 	r.Run("0.0.0.0:8080") // Start server on port 8080
