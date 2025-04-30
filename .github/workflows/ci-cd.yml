@@ -37,17 +37,17 @@ jobs:
       # Step 5: Deploy to EC2
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} <<'EOF'
+          ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} <<EOF
           docker pull deandoyle/gigr:latest
           docker stop gigr 2>/dev/null || true
           docker rm gigr 2>/dev/null || true
           docker run -d -p 80:8080 \
-            -e DB_HOST="${DB_HOST}" \
-            -e DB_NAME="${DB_NAME}" \
-            -e DB_PASSWORD="${DB_PASSWORD}" \
-            -e DB_USER="${DB_USER}" \
-            -e COGNITO_REGION="${COGNITO_REGION}" \
-            -e COGNITO_USER_POOL_ID="${COGNITO_USER_POOL_ID}" \
+            -e DB_HOST="${{ secrets.DB_HOST }}" \
+            -e DB_NAME="${{ secrets.DB_NAME }}" \
+            -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+            -e DB_USER="${{ secrets.DB_USER }}" \
+            -e COGNITO_REGION="${{ secrets.COGNITO_REGION }}" \
+            -e COGNITO_USER_POOL_ID="${{ secrets.COGNITO_USER_POOL_ID }}" \
             --name gigr deandoyle/gigr:latest
           EOF
 
