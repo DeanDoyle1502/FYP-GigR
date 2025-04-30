@@ -36,10 +36,10 @@ const ChatView: React.FC<ChatViewProps> = ({ gigID, otherUserID }) => {
 
     try {
       const [sessionRes, messagesRes] = await Promise.all([
-        api.get(`http://localhost:8080/gigs/${gigID}/session/${otherUserID}`, {
+        api.get(`/gigs/${gigID}/session/${otherUserID}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        api.get(`http://localhost:8080/gigs/${gigID}/thread/${otherUserID}`, {
+        api.get(`/gigs/${gigID}/thread/${otherUserID}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -57,7 +57,7 @@ const ChatView: React.FC<ChatViewProps> = ({ gigID, otherUserID }) => {
 
     try {
       await api.post(
-        `http://localhost:8080/gigs/${gigID}/messages`,
+        `/gigs/${gigID}/messages`,
         {
           receiverId: otherUserID,
           content: newMessage,
@@ -78,7 +78,7 @@ const ChatView: React.FC<ChatViewProps> = ({ gigID, otherUserID }) => {
 
     try {
       await api.patch(
-        `http://localhost:8080/gigs/${gigID}/session/${otherUserID}/complete`,
+        `/gigs/${gigID}/session/${otherUserID}/complete`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
