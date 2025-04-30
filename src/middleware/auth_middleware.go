@@ -20,17 +20,19 @@ func SetupJWKs() {
 	region := os.Getenv("AWS_REGION")
 
 	jwksURL := fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json", region, userPoolID)
+	fmt.Println("🔐 Loading Cognito JWKs from:", jwksURL)
 
 	var err error
 	jwks, err = keyfunc.Get(jwksURL, keyfunc.Options{
 		RefreshInterval: time.Hour,
 		RefreshErrorHandler: func(err error) {
-			fmt.Printf("Error refreshing JWKs: %v\n", err)
+			fmt.Printf("❌ Error refreshing JWKs: %v\n", err)
 		},
 	})
 	if err != nil {
-		panic(fmt.Sprintf("Failed to load Cognito JWKs: %v", err))
+		panic(fmt.Sprintf("❌ Failed to load Cognito JWKs: %v", err))
 	}
+	fmt.Println("✅ JWKs loaded successfully")
 }
 
 // Middleware to verify JWT and attach Cognito sub to context
@@ -39,6 +41,7 @@ func AuthMiddleware(userRepo *repositories.UserRepository) gin.HandlerFunc {
 		fmt.Println("🔐 AuthMiddleware triggered")
 
 		authHeader := c.GetHeader("Authorization")
+		fmt.Println("🛡️  Received Authorization header:", authHeader)
 
 		if authHeader == "" {
 			fmt.Println("❌ No Authorization header found")
@@ -56,18 +59,28 @@ func AuthMiddleware(userRepo *repositories.UserRepository) gin.HandlerFunc {
 		}
 
 		tokenString := parts[1]
+		fmt.Println("🔐 Token string extracted")
 
 		token, err := jwt.Parse(tokenString, jwks.Keyfunc)
-		if err != nil || !token.Valid {
-			fmt.Println("❌ Error parsing token:", err)
+		if err != nil {
+			fmt.Println("❌ jwt.Parse() failed:", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
 		}
 
+		if !token.Valid {
+			fmt.Println("❌ Token is invalid")
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		fmt.Println("✅ Token is valid")
+
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			fmt.Println("❌ Error parsing claims from token")
+			fmt.Println("❌ Failed to cast claims from token")
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			c.Abort()
 			return
@@ -75,14 +88,16 @@ func AuthMiddleware(userRepo *repositories.UserRepository) gin.HandlerFunc {
 
 		sub, ok := claims["sub"].(string)
 		if !ok || sub == "" {
-			fmt.Println("❌ Token is missing 'sub' field")
+			fmt.Println("❌ Token is missing 'sub' field:", claims)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token missing user ID (sub)"})
 			c.Abort()
 			return
 		}
 
+		fmt.Println("✅ Token claims extracted. sub =", sub)
+
 		c.Set("user", claims)
-		c.Set("sub", sub)
+		c.Set("userID", sub) // make sure handler reads 'userID' key
 
 		c.Next()
 	}
