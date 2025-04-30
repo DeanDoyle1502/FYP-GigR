@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios"
 import Layout from "../../components/Layout";
 import FormInput from "../../components/FormInput";
 import Button from "../../components/Button";
@@ -37,8 +37,7 @@ const EditGigPage: React.FC = () => {
       return;
     }
 
-    axios
-      .get(`http://localhost:8080/gigs/details/${id}`, {
+    api.get(`/gigs/details/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -64,8 +63,8 @@ const EditGigPage: React.FC = () => {
     const formattedDate = new Date(gig.date).toISOString();
 
     try {
-      await axios.put(
-        `http://localhost:8080/gigs/details/${id}`,
+      await api.put(
+        `/gigs/details/${id}`,
         { ...gig, date: formattedDate },
         { headers: { Authorization: `Bearer ${token}` } }
       );
