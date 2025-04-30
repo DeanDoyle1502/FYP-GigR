@@ -14,8 +14,8 @@ func SetupRouter(
 	authHandler *handlers.AuthHandler,
 	messageHandler *handlers.MessageHandler,
 	chatSessionHandler *handlers.ChatSessionHandler,
-	userRepo *repositories.UserRepository) *gin.Engine {
-
+	userRepo *repositories.UserRepository,
+) {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -32,7 +32,7 @@ func SetupRouter(
 
 	// Define gig routes
 	gigs := r.Group("/gigs")
-	gigs.Use(authHandler.Middleware()) // ✅ use handler-based auth middleware
+	gigs.Use(authHandler.Middleware())
 	{
 		gigs.POST("/", gigHandler.CreateGig)
 		gigs.GET("/", gigHandler.GetAllGigs)
@@ -62,19 +62,15 @@ func SetupRouter(
 		c.JSON(200, gin.H{"message": "pong"})
 	})
 
-	// Authorisation
+	// Public auth routes
 	r.POST("/auth/register", authHandler.RegisterUser)
 	r.POST("/auth/login", authHandler.LoginUser)
 	r.POST("/auth/confirm", authHandler.ConfirmUser)
 
 	// Protected auth routes
 	auth := r.Group("/auth")
-	auth.Use(authHandler.Middleware()) // ✅ same here
+	auth.Use(authHandler.Middleware())
 	{
 		auth.GET("/me", userHandler.GetCurrentUser)
 	}
-
-	return r
 }
-
-//
