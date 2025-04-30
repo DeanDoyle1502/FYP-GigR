@@ -8,13 +8,13 @@ import (
 )
 
 func SetupRouter(
+	r *gin.Engine,
 	userHandler *handlers.UserHandler,
 	gigHandler *handlers.GigHandler,
 	authHandler *handlers.AuthHandler,
 	messageHandler *handlers.MessageHandler,
 	chatSessionHandler *handlers.ChatSessionHandler,
 	userRepo *repositories.UserRepository) *gin.Engine {
-	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
