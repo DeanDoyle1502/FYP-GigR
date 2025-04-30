@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
 	"github.com/DeanDoyle1502/FYP-GigR.git/src/config"
@@ -56,8 +57,7 @@ func main() {
 	messageHandler := handlers.NewMessageHandler(messageService)
 	chatSessionHandler := handlers.NewChatSessionHandler(chatSessionService)
 
-	// Routes
-	r := routes.SetupRouter(userHandler, gigHandler, authHandler, messageHandler, chatSessionHandler, userRepo)
+	r := gin.Default()
 
 	// CORS setup
 	r.Use(cors.New(cors.Config{
@@ -68,6 +68,9 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
+
+	// Routes
+	routes.SetupRouter(r, userHandler, gigHandler, authHandler, messageHandler, chatSessionHandler, userRepo)
 
 	fmt.Println("🚀 Server started with auth routes")
 	r.Run("0.0.0.0:8080") // Start server on port 8080
