@@ -28,7 +28,7 @@ func InitDynamoDB() *dynamodb.Client {
 			aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
 				if service == dynamodb.ServiceID {
 					return aws.Endpoint{
-						URL:           "http://localhost:8000",
+						URL:           "http://3.253.4.193",
 						SigningRegion: region,
 					}, nil
 				}
